@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
-    <link href="css.css" rel="stylesheet">
+    <link href="CSS/HomePage.css" rel="stylesheet">
 </head>
 <body>
 
@@ -103,7 +103,7 @@
                 </div>
             </div>
         </div>
-        <div class="text-center">
+        <div class="center">
             <a href="TourListServlet" class="btn btn-large">Xem tất cả tour</a>
         </div>
     </div>
@@ -111,7 +111,7 @@
 
 
 <!-- ================== PHẦN 2: KHUYẾN MÃI NỔI BẬT ================== -->
-<section class="promo py-5">
+<section class="promo">
     <div class="container">
         <h2 class="section-title text-center">Khuyến Mãi <span class="highlight">Hot</span> Trong Tuần</h2>
         <div class="promo-grid">
@@ -143,7 +143,7 @@
 
 
 <!-- ================== PHẦN 3: ĐÁNH GIÁ KHÁCH HÀNG ================== -->
-<section class="testimonials py-5 bg-light">
+<section class="testimonials">
     <div class="container">
         <h2 class="section-title text-center">Khách Hàng Nói Gì?</h2>
         <div class="testimonials-grid">
