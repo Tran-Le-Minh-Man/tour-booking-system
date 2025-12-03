@@ -1,0 +1,35 @@
+@charset "UTF-8";
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: 'Montserrat', sans-serif;
+	line-height: 1.6;
+	color: #333;
+	background: #f8f9fa;
+}
+
+/* Container */
+.container {
+	width: 90%;	
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 15px;
+}
+
+/* Footer */
+.footer {
+	background: #222;
+	color: #ccc;
+	text-align: center;
+	padding: 2rem 0;
+	font-size: 0.9rem;
+}
+
+.footer p {
+	margin: 0.5rem 0;
+}

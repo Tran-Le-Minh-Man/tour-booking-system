@@ -1,4 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -16,30 +18,8 @@
     <link href="CSS/HomePage.css" rel="stylesheet">
 </head>
 <body>
-
-<!-- Navbar -->
-<header class="navbar">
-    <div class="container">
-        <div class="nav-brand">
-            <a href="index.jsp">
-                <span class="logo-text">Việt Nam</span> Travel
-            </a>
-        </div>
-        <nav class="nav-menu">
-            <ul>
-                <li><a href="index.jsp" class="active">Trang chủ</a></li>
-                <li><a href="TourListServlet">Tất cả tour</a></li>
-                <li><a href="login.jsp">Đăng nhập</a></li>
-                <li><a href="register.jsp">Đăng ký</a></li>
-            </ul>
-        </nav>
-        <div class="nav-toggle">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-    </div>
-</header>
+<!-- ========== IMPORT HEADER ========== -->
+<jsp:include page="WEB-INF/Common/header.jsp" />
 
 <!-- Hero Section -->
 <section class="hero">
@@ -233,11 +213,7 @@
     });
 </script>
 <!-- Footer (giữ nguyên) -->
-<footer class="footer">
-    <div class="container">
-        <p>&copy; 2025 Việt Nam Travel - Website đặt tour du lịch nội địa</p>
-        <p>Đồ án lập trình web - <strong>...</strong></p>
-    </div>
-</footer>
+<!-- ========== IMPORT FOOTER ========== -->
+<jsp:include page="WEB-INF/Common/footer.jsp" />
 </body>
 </html>
