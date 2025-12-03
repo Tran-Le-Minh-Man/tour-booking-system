@@ -17,8 +17,8 @@
             <ul>
 
                 <li>
-                    <a href="${pageContext.request.contextPath}/index.jsp"
-                       class="${fn:endsWith(current, '/index.jsp') ? 'active' : ''}">
+                    <a href="${pageContext.request.contextPath}/HomePage.jsp"
+                       class="${fn:endsWith(current, '/HomePage.jsp') ? 'active' : ''}">
                        Trang chủ
                     </a>
                 </li>
