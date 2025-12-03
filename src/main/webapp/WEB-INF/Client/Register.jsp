@@ -64,7 +64,7 @@
     </div>
 
     <div class="auth-footer">
-        Đã có tài khoản? <a href="login.jsp">Đăng nhập ngay</a>
+        Đã có tài khoản? <a href="${pageContext.request.contextPath}/Login">Đăng nhập ngay</a>
     </div>
 </div>
 

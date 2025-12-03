@@ -8,7 +8,7 @@
     <div class="container">
 
         <div class="nav-brand">
-            <a href="${pageContext.request.contextPath}/index.jsp">
+            <a href="${pageContext.request.contextPath}/HomePage.jsp">
                 <span class="logo-text">Việt Nam</span> Travel
             </a>
         </div>
@@ -50,14 +50,14 @@
                     <c:otherwise>
 
                         <li>
-                            <a href="${pageContext.request.contextPath}/login.jsp"
+                            <a href="${pageContext.request.contextPath}/Login"
                                class="${fn:contains(current, 'login.jsp') ? 'active' : ''}">
                                Đăng nhập
                             </a>
                         </li>
 
                         <li>
-                            <a href="${pageContext.request.contextPath}/register.jsp"
+                            <a href="${pageContext.request.contextPath}/Register"
                                class="${fn:contains(current, 'register.jsp') ? 'active' : ''}">
                                Đăng ký
                             </a>

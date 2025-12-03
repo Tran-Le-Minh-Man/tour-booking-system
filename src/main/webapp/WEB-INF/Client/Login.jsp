@@ -53,7 +53,7 @@
     </div>
 
     <div class="auth-footer">
-        Chưa có tài khoản? <a href="register.jsp">Đăng ký miễn phí</a>
+        Chưa có tài khoản? <a href="${pageContext.request.contextPath}/Register">Đăng ký miễn phí</a>
     </div>
 </div>
 
