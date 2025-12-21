@@ -1,3 +1,4 @@
+<!-- Tran Le Minh Man - 23130186--> 
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
@@ -212,7 +213,6 @@
         document.querySelector('.nav-menu').classList.toggle('active');
     });
 </script>
-<!-- Footer (giữ nguyên) -->
 <!-- ========== IMPORT FOOTER ========== -->
 <jsp:include page="WEB-INF/Common/footer.jsp" />
 </body>
