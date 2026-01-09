@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/CSS/Auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-    :root {
+        :root {
             --bg-image: url(../Images/Login.png);
         }
     </style>
@@ -23,24 +23,35 @@
     </div>
 
     <div class="auth-body">
+        <!-- Hiển thị thông báo thành công (màu xanh) -->
+        <c:if test="${not empty success}">
+            <div class="success-message">${success}</div>
+        </c:if>
+
+        <!-- Hiển thị thông báo lỗi (màu đỏ) -->
         <c:if test="${not empty error}">
             <div class="error-message">${error}</div>
         </c:if>
 
         <form action="<%= request.getContextPath() %>/LoginServlet" method="post">
+            <!-- CSRF Token -->
+            <input type="hidden" name="_csrf_token" value="${_csrf_token}">
+            
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email" required placeholder="you@example.com" value="${cookie.email.value}">
+                <input type="email" id="email" name="email" required 
+                       placeholder="you@example.com" 
+                       value="<c:out value='${email}'/>">
             </div>
 
             <div class="form-group">
                 <label for="password">Mật khẩu</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required placeholder="Nhập mật khẩu">
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                 <label style="font-weight:normal; font-size:0.9rem;">
-                    <input type="checkbox" name="remember" ${cookie.email != null ? 'checked' : ''}>
+                    <input type="checkbox" name="remember">
                     Ghi nhớ đăng nhập
                 </label>
                 <a href="#" style="font-size:0.9rem; color:#0C67B3;">Quên mật khẩu?</a>
@@ -53,7 +64,7 @@
     </div>
 
     <div class="auth-footer">
-        Chưa có tài khoản? <a href="${pageContext.request.contextPath}/Register">Đăng ký miễn phí</a>
+        Chưa có tài khoản? <a href="${pageContext.request.contextPath}/RegisterServlet">Đăng ký miễn phí</a>
     </div>
 </div>
 

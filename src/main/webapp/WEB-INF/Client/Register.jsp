@@ -8,11 +8,11 @@
     <title>Đăng ký tài khoản - Việt Nam Travel</title>
     <link rel="stylesheet" href="<%= request.getContextPath() %>/CSS/Auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-   <style>
-   :root {
+    <style>
+        :root {
             --bg-image: url(../Images/Register.jpg);
         }
-   </style>
+    </style>
 </head>
 <body>
 
@@ -32,29 +32,40 @@
         </c:if>
 
         <form action="<%= request.getContextPath() %>/RegisterServlet" method="post">
+            <!-- CSRF Token -->
+            <input type="hidden" name="_csrf_token" value="${_csrf_token}">
+            
             <div class="form-group">
                 <label for="fullName">Họ và tên</label>
-                <input type="text" id="fullName" name="fullName" required placeholder="Nguyễn Văn A">
+                <input type="text" id="fullName" name="fullName" required 
+                       placeholder="Nguyễn Văn A" 
+                       value="<c:out value='${fullName}'/>">
             </div>
 
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email" required placeholder="you@example.com">
+                <input type="email" id="email" name="email" required 
+                       placeholder="you@example.com"
+                       value="<c:out value='${email}'/>">
             </div>
 
             <div class="form-group">
                 <label for="phone">Số điện thoại</label>
-                <input type="tel" id="phone" name="phone" required placeholder="0901234567">
+                <input type="tel" id="phone" name="phone" 
+                       placeholder="0901234567 (tùy chọn)"
+                       value="<c:out value='${phone}'/>">
             </div>
 
             <div class="form-group">
                 <label for="password">Mật khẩu</label>
-                <input type="password" id="password" name="password" required >
+                <input type="password" id="password" name="password" required 
+                       placeholder="Tối thiểu 8 ký tự">
             </div>
 
             <div class="form-group">
                 <label for="confirmPassword">Xác nhận mật khẩu</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                <input type="password" id="confirmPassword" name="confirmPassword" required
+                       placeholder="Nhập lại mật khẩu">
             </div>
 
             <button type="submit" class="btn-primary">
@@ -64,7 +75,7 @@
     </div>
 
     <div class="auth-footer">
-        Đã có tài khoản? <a href="${pageContext.request.contextPath}/Login">Đăng nhập ngay</a>
+        Đã có tài khoản? <a href="${pageContext.request.contextPath}/LoginServlet">Đăng nhập ngay</a>
     </div>
 </div>
 
