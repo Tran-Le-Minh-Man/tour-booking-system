@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 
 /**
  * Validation utility class for input validation
+ * Consolidated password validation logic
  * Author: MiniMax Agent
  */
 public class ValidationUtil {
@@ -19,7 +20,7 @@ public class ValidationUtil {
     // Vietnamese name pattern (allows letters, spaces, Vietnamese characters)
     private static final String NAME_PATTERN = 
         "^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀẾỂỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪỬỮỰỲỴÝỶỸửữựỳýỵỷỹ\\s]+$";
-
+    
     /**
      * Validate email format
      * @param email the email to validate
@@ -62,62 +63,22 @@ public class ValidationUtil {
 
     /**
      * Validate password strength
+     * Delegates to PasswordUtil for validation logic
      * @param password the password to validate
      * @return true if password meets minimum requirements
      */
     public static boolean isValidPassword(String password) {
-        if (password == null || password.length() < 8) {
-            return false;
-        }
-        
-        // Check for at least one uppercase letter
-        boolean hasUpperCase = password.matches(".*[A-Z].*");
-        // Check for at least one lowercase letter
-        boolean hasLowerCase = password.matches(".*[a-z].*");
-        // Check for at least one digit
-        boolean hasDigit = password.matches(".*\\d.*");
-        // Check for at least one special character
-        boolean hasSpecial = password.matches(".*[!@#$%^&*(),.?\":{}|<>].*");
-        
-        // Require at least 3 of the 4 criteria, or minimum 12 characters
-        int criteriaMet = 0;
-        if (hasUpperCase) criteriaMet++;
-        if (hasLowerCase) criteriaMet++;
-        if (hasDigit) criteriaMet++;
-        if (hasSpecial) criteriaMet++;
-        
-        return password.length() >= 12 || criteriaMet >= 3;
+        return PasswordUtil.isValidPassword(password);
     }
 
     /**
      * Get password strength error message
+     * Delegates to PasswordUtil for error messages
      * @param password the password to check
      * @return error message or null if valid
      */
     public static String getPasswordErrorMessage(String password) {
-        if (password == null || password.isEmpty()) {
-            return "Mật khẩu không được để trống";
-        }
-        if (password.length() < 8) {
-            return "Mật khẩu phải có ít nhất 8 ký tự";
-        }
-        
-        boolean hasUpperCase = password.matches(".*[A-Z].*");
-        boolean hasLowerCase = password.matches(".*[a-z].*");
-        boolean hasDigit = password.matches(".*\\d.*");
-        boolean hasSpecial = password.matches(".*[!@#$%^&*(),.?\":{}|<>].*");
-        
-        int criteriaMet = 0;
-        if (hasUpperCase) criteriaMet++;
-        if (hasLowerCase) criteriaMet++;
-        if (hasDigit) criteriaMet++;
-        if (hasSpecial) criteriaMet++;
-        
-        if (password.length() < 12 && criteriaMet < 3) {
-            return "Mật khẩu phải có ít nhất 12 ký tự HOẶC kết hợp ít nhất 3 trong 4 loại ký tự: chữ hoa, chữ thường, số, ký tự đặc biệt";
-        }
-        
-        return null; // Valid
+        return PasswordUtil.getPasswordErrorMessage(password);
     }
 
     /**
@@ -156,5 +117,17 @@ public class ValidationUtil {
             return null;
         }
         return trimmed;
+    }
+    
+    /**
+     * Validate multiple fields at once
+     * @param validations array of validation results
+     * @return true if all validations pass
+     */
+    public static boolean validateAll(boolean... validations) {
+        for (boolean validation : validations) {
+            if (!validation) return false;
+        }
+        return true;
     }
 }

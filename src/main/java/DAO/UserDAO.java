@@ -11,11 +11,34 @@ import java.sql.SQLException;
 
 /**
  * Data Access Object for User entity - Microsoft Access Database Version
+ * Enhanced with improved exception handling and connection management
  * Author: MiniMax Agent
  */
 public class UserDAO {
     
     private static final String TABLE_NAME = "users";
+    
+    /**
+     * Custom exception for database operations
+     */
+    public static class UserDAOException extends RuntimeException {
+        private final String operation;
+        private final String detail;
+        
+        public UserDAOException(String operation, String detail, Throwable cause) {
+            super(detail, cause);
+            this.operation = operation;
+            this.detail = detail;
+        }
+        
+        public String getOperation() {
+            return operation;
+        }
+        
+        public String getDetail() {
+            return detail;
+        }
+    }
     
     /**
      * Check if email already exists in database
@@ -28,15 +51,14 @@ public class UserDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setString(1, email.trim().toLowerCase());
+            stmt.setString(1, normalizeEmail(email));
             
             try (ResultSet rs = stmt.executeQuery()) {
-                return rs.next(); // Returns true if email exists
+                return rs.next();
             }
             
         } catch (SQLException e) {
-            System.err.println("Error checking email existence: " + e.getMessage());
-            throw new RuntimeException("Database error occurred", e);
+            throw new UserDAOException("emailExists", "Error checking email existence", e);
         }
     }
 
@@ -51,7 +73,7 @@ public class UserDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setString(1, email.trim().toLowerCase());
+            stmt.setString(1, normalizeEmail(email));
             
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -60,8 +82,7 @@ public class UserDAO {
             }
             
         } catch (SQLException e) {
-            System.err.println("Error finding user by email: " + e.getMessage());
-            throw new RuntimeException("Database error occurred", e);
+            throw new UserDAOException("findByEmail", "Error finding user by email", e);
         }
         
         return null;
@@ -87,8 +108,7 @@ public class UserDAO {
             }
             
         } catch (SQLException e) {
-            System.err.println("Error finding user by ID: " + e.getMessage());
-            throw new RuntimeException("Database error occurred", e);
+            throw new UserDAOException("findById", "Error finding user by ID", e);
         }
         
         return null;
@@ -109,24 +129,18 @@ public class UserDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setString(1, user.getEmail().trim().toLowerCase());
+            stmt.setString(1, normalizeEmail(user.getEmail()));
             stmt.setString(2, hashedPassword);
-            stmt.setString(3, user.getFullName().trim());
-            stmt.setString(4, user.getPhone() != null ? user.getPhone().trim() : "");
+            stmt.setString(3, sanitizeString(user.getFullName()));
+            stmt.setString(4, sanitizeString(user.getPhone()));
             stmt.setString(5, user.getRole() != null ? user.getRole() : "USER");
             
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
             
         } catch (SQLException e) {
-            System.err.println("Error registering user: " + e.getMessage());
-            
-            // Check for duplicate entry error
-            if (e.getMessage().contains("duplicate") || e.getMessage().contains("unique")) {
-                throw new RuntimeException("Email đã được đăng ký", e);
-            }
-            
-            throw new RuntimeException("Database error occurred", e);
+            handleSQLException(e, "register");
+            throw new UserDAOException("register", "Registration failed", e);
         }
     }
 
@@ -144,7 +158,7 @@ public class UserDAO {
         }
         
         // Check password
-        boolean passwordValid = PasswordUtil.checkPassword(password, user.getPassword());
+        boolean passwordValid = PasswordUtil.checkPassword(password, user.getRawPassword());
         
         if (!passwordValid) {
             return null;
@@ -164,16 +178,15 @@ public class UserDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setString(1, user.getFullName().trim());
-            stmt.setString(2, user.getPhone() != null ? user.getPhone().trim() : "");
+            stmt.setString(1, sanitizeString(user.getFullName()));
+            stmt.setString(2, sanitizeString(user.getPhone()));
             stmt.setInt(3, user.getUserId());
             
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
             
         } catch (SQLException e) {
-            System.err.println("Error updating user profile: " + e.getMessage());
-            throw new RuntimeException("Database error occurred", e);
+            throw new UserDAOException("updateProfile", "Error updating user profile", e);
         }
     }
 
@@ -198,8 +211,7 @@ public class UserDAO {
             return rowsAffected > 0;
             
         } catch (SQLException e) {
-            System.err.println("Error updating password: " + e.getMessage());
-            throw new RuntimeException("Database error occurred", e);
+            throw new UserDAOException("updatePassword", "Error updating password", e);
         }
     }
 
@@ -229,5 +241,34 @@ public class UserDAO {
         }
         
         return user;
+    }
+    
+    /**
+     * Normalize email for database queries
+     */
+    private String normalizeEmail(String email) {
+        return (email != null) ? email.trim().toLowerCase() : "";
+    }
+    
+    /**
+     * Sanitize string for database queries
+     */
+    private String sanitizeString(String str) {
+        return (str != null) ? str.trim() : "";
+    }
+    
+    /**
+     * Handle SQL exceptions with appropriate error messages
+     */
+    private void handleSQLException(SQLException e, String operation) {
+        String message = e.getMessage();
+        
+        if (message.contains("duplicate") || message.contains("unique") || message.contains("primary key")) {
+            System.err.println("Duplicate entry detected during " + operation + ": " + message);
+        } else if (message.contains("connection") || message.contains("timeout")) {
+            System.err.println("Database connection error during " + operation + ": " + message);
+        } else {
+            System.err.println("Database error during " + operation + ": " + message);
+        }
     }
 }

@@ -4,16 +4,23 @@ import org.mindrot.jbcrypt.BCrypt;
 
 /**
  * Password utility class for secure password handling using BCrypt
+ * Provides centralized password validation logic
  * Author: MiniMax Agent
  */
 public class PasswordUtil {
     // BCrypt work factor (higher = more secure but slower)
+    // Recommended range: 10-12 for most applications
     private static final int WORK_FACTOR = 10;
+    
+    // Minimum password requirements
+    private static final int MIN_PASSWORD_LENGTH = 8;
+    private static final int RECOMMENDED_PASSWORD_LENGTH = 12;
 
     /**
      * Hash a plain text password using BCrypt
      * @param plainPassword the plain text password
      * @return the hashed password
+     * @throws IllegalArgumentException if password is null or empty
      */
     public static String hashPassword(String plainPassword) {
         if (plainPassword == null || plainPassword.isEmpty()) {
@@ -47,30 +54,76 @@ public class PasswordUtil {
 
     /**
      * Validate password strength
+     * Requirements:
+     * - Minimum 8 characters
+     * - AND either:
+     *   - At least 12 characters, OR
+     *   - At least 3 of 4 character types (uppercase, lowercase, digit, special)
+     * 
      * @param password the password to validate
      * @return true if password meets minimum requirements
      */
     public static boolean isValidPassword(String password) {
-        if (password == null || password.length() < 8) {
+        if (password == null || password.length() < MIN_PASSWORD_LENGTH) {
             return false;
         }
         
-        // Check for at least one uppercase letter
+        // Count character types
         boolean hasUpperCase = password.matches(".*[A-Z].*");
-        // Check for at least one lowercase letter
         boolean hasLowerCase = password.matches(".*[a-z].*");
-        // Check for at least one digit
         boolean hasDigit = password.matches(".*\\d.*");
-        // Check for at least one special character
         boolean hasSpecial = password.matches(".*[!@#$%^&*(),.?\":{}|<>].*");
         
-        // Require at least 3 of the 4 criteria, or minimum 12 characters
+        // Calculate criteria met
         int criteriaMet = 0;
         if (hasUpperCase) criteriaMet++;
         if (hasLowerCase) criteriaMet++;
         if (hasDigit) criteriaMet++;
         if (hasSpecial) criteriaMet++;
         
-        return password.length() >= 12 || criteriaMet >= 3;
+        // Password is valid if it's long enough OR has enough variety
+        return password.length() >= RECOMMENDED_PASSWORD_LENGTH || criteriaMet >= 3;
+    }
+
+    /**
+     * Get password strength error message
+     * @param password the password to check
+     * @return error message or null if valid
+     */
+    public static String getPasswordErrorMessage(String password) {
+        if (password == null || password.isEmpty()) {
+            return "Mật khẩu không được để trống";
+        }
+        if (password.length() < MIN_PASSWORD_LENGTH) {
+            return "Mật khẩu phải có ít nhất " + MIN_PASSWORD_LENGTH + " ký tự";
+        }
+        
+        boolean hasUpperCase = password.matches(".*[A-Z].*");
+        boolean hasLowerCase = password.matches(".*[a-z].*");
+        boolean hasDigit = password.matches(".*\\d.*");
+        boolean hasSpecial = password.matches(".*[!@#$%^&*(),.?\":{}|<>].*");
+        
+        int criteriaMet = 0;
+        if (hasUpperCase) criteriaMet++;
+        if (hasLowerCase) criteriaMet++;
+        if (hasDigit) criteriaMet++;
+        if (hasSpecial) criteriaMet++;
+        
+        if (password.length() < RECOMMENDED_PASSWORD_LENGTH && criteriaMet < 3) {
+            return String.format("Mật khẩu phải có ít nhất %d ký tự HOẶC kết hợp ít nhất 3 trong 4 loại ký tự: chữ hoa, chữ thường, số, ký tự đặc biệt", 
+                RECOMMENDED_PASSWORD_LENGTH);
+        }
+        
+        return null; // Valid
+    }
+    
+    /**
+     * Estimate password crack time based on BCrypt work factor
+     * @param workFactor the BCrypt work factor
+     * @return estimated crack time in seconds
+     */
+    public static int estimateCrackTime(int workFactor) {
+        // Rough estimate: 2^workFactor operations per second on modern hardware
+        return (int) Math.pow(2, workFactor);
     }
 }
