@@ -31,15 +31,27 @@
                         </a>
                     </li>
                     <li>
-                        <a href="${pageContext.request.contextPath}/TourAdminServlet?action=list"
+                        <a href="${pageContext.request.contextPath}/Admin/TourServlet?action=list"
                            class="${fn:contains(current, 'TourList.jsp') ? 'active' : ''}">
                             <i class="fas fa-map-marked-alt"></i> Quản lý Tour
                         </a>
                     </li>
                     <li>
-                        <a href="${pageContext.request.contextPath}/BookingAdminServlet?action=list"
+                        <a href="${pageContext.request.contextPath}/Admin/BookingServlet?action=list"
                            class="${fn:contains(current, 'BookingList.jsp') ? 'active' : ''}">
                             <i class="fas fa-calendar-check"></i> Quản lý Đặt tour
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/Admin/RevenueServlet"
+                           class="${fn:contains(current, 'Revenue.jsp') ? 'active' : ''}">
+                            <i class="fas fa-chart-line"></i> Báo cáo Doanh thu
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/Admin/UserServlet?action=list"
+                           class="${fn:contains(current, 'UserList.jsp') ? 'active' : ''}">
+                            <i class="fas fa-users"></i> Quản lý Users
                         </a>
                     </li>
                     <li>

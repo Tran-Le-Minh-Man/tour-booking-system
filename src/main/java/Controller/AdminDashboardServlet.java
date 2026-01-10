@@ -12,14 +12,13 @@ import java.io.IOException;
 
 /**
  * Servlet for Admin Dashboard
- * Handles access to admin pages
  * Author: MiniMax Agent
  */
 @WebServlet("/Admin/Dashboard")
-public class AdminServlet extends HttpServlet {
+public class AdminDashboardServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
-    public AdminServlet() {
+    public AdminDashboardServlet() {
         super();
     }
     
@@ -46,7 +45,25 @@ public class AdminServlet extends HttpServlet {
             return;
         }
         
-        // Forward to Admin Dashboard
+        // Get statistics for dashboard
+        try {
+            DAO.BookingDAO bookingDAO = new DAO.BookingDAO();
+            DAO.TourDAO tourDAO = new DAO.TourDAO();
+            DAO.UserDAO userDAO = new DAO.UserDAO();
+            
+            request.setAttribute("totalTours", tourDAO.getTotalCount());
+            request.setAttribute("totalBookings", bookingDAO.getTotalCount());
+            request.setAttribute("pendingBookings", bookingDAO.countByStatus("PENDING"));
+            request.setAttribute("totalUsers", userDAO.getTotalCount());
+            request.setAttribute("recentBookings", bookingDAO.getRecentBookings(5));
+        } catch (Exception e) {
+            System.err.println("Error loading dashboard stats: " + e.getMessage());
+            request.setAttribute("totalTours", 0);
+            request.setAttribute("totalBookings", 0);
+            request.setAttribute("pendingBookings", 0);
+            request.setAttribute("totalUsers", 0);
+        }
+        
         request.getRequestDispatcher("/WEB-INF/Admin/AdminDashboard.jsp").forward(request, response);
     }
     
