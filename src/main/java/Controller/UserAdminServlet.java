@@ -15,7 +15,6 @@ import java.util.List;
 
 /**
  * Servlet for managing users (Admin)
- * Author: MiniMax Agent
  */
 @WebServlet("/Admin/UserServlet")
 public class UserAdminServlet extends HttpServlet {

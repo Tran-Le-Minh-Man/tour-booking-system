@@ -5,7 +5,6 @@ import java.util.regex.Pattern;
 /**
  * Validation utility class for input validation
  * Consolidated password validation logic
- * Author: MiniMax Agent
  */
 public class ValidationUtil {
     

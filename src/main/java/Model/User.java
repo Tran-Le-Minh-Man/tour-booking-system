@@ -4,7 +4,6 @@ import java.util.Objects;
 
 /**
  * User model class with security enhancements
- * Author: MiniMax Agent
  */
 public class User {
     private int userId;

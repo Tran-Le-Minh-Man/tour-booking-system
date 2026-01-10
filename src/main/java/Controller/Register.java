@@ -15,7 +15,6 @@ import java.io.IOException;
 
 /**
  * Servlet for handling user registration
- * Author: MiniMax Agent
  */
 @WebServlet("/RegisterServlet")
 public class Register extends HttpServlet {

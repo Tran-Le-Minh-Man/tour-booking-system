@@ -14,7 +14,6 @@ import java.util.List;
 
 /**
  * Data Access Object for Booking entity
- * Author: MiniMax Agent
  */
 public class BookingDAO {
     

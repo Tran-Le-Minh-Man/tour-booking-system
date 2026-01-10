@@ -14,7 +14,6 @@ import java.util.List;
 /**
  * Data Access Object for User entity
  * Handles all database operations for users
- * Author: MiniMax Agent
  */
 public class UserDAO {
     

@@ -6,7 +6,6 @@ import java.util.Objects;
 
 /**
  * Booking model class
- * Author: MiniMax Agent
  */
 public class Booking {
     private int bookingId;

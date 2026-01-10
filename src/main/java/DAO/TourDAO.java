@@ -14,7 +14,6 @@ import java.util.List;
 
 /**
  * Data Access Object for Tour entity
- * Author: MiniMax Agent
  */
 public class TourDAO {
     

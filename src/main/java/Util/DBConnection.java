@@ -2,6 +2,10 @@ package Util;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -10,7 +14,6 @@ import java.util.Properties;
 /**
  * Database connection utility class for Microsoft Access Database (ACDB)
  * Supports configuration file loading and connection pooling
- * Author: MiniMax Agent
  */
 public class DBConnection {
     // Access JDBC Driver (UCanAccess)
@@ -40,16 +43,56 @@ public class DBConnection {
      */
     private static void loadConfiguration() {
         Properties props = new Properties();
+        
+        // Try to load from properties file
         try (FileInputStream fis = new FileInputStream(
                 System.getProperty("catalina.base") + CONFIG_FILE)) {
             props.load(fis);
-            databaseUrl = props.getProperty("db.url", 
-                "jdbc:ucanaccess://D:/File word pdf/tour_booking.accdb");
+            databaseUrl = props.getProperty("db.url");
+            if (databaseUrl == null || databaseUrl.isEmpty()) {
+                databaseUrl = getDefaultDatabasePath();
+            }
         } catch (IOException e) {
-            // Fallback to default path if config file not found
-            databaseUrl = "jdbc:ucanaccess://D:/File word pdf/tour_booking.accdb";
+            // Config file not found, use default path
+            databaseUrl = getDefaultDatabasePath();
             System.err.println("Config file not found, using default path: " + e.getMessage());
         }
+    }
+    
+    /**
+     * Get default database path - works for both development and production
+     */
+    private static String getDefaultDatabasePath() {
+        String catalinaBase = System.getProperty("catalina.base", "");
+        
+        // If running in Tomcat server
+        if (!catalinaBase.isEmpty()) {
+            return "jdbc:ucanaccess://" + catalinaBase + "/WEB-INF/db/tour_booking.accdb";
+        }
+        
+        // If running as standalone Java app (development)
+        // Try to find the database file in common locations
+        String[] possiblePaths = {
+            "src/main/webapp/WEB-INF/db/tour_booking.accdb",
+            "../src/main/webapp/WEB-INF/db/tour_booking.accdb",
+            "../../src/main/webapp/WEB-INF/db/tour_booking.accdb",
+            "tour_booking.accdb",
+            "../tour_booking.accdb"
+        };
+        
+        for (String path : possiblePaths) {
+            Path dbPath = Paths.get(path).toAbsolutePath();
+            if (Files.exists(dbPath)) {
+                System.out.println("Found database at: " + dbPath);
+                return "jdbc:ucanaccess://" + dbPath.toString();
+            }
+        }
+        
+        // Last resort: use user home directory
+        String userHome = System.getProperty("user.home");
+        String defaultPath = userHome + "/tour_booking.accdb";
+        System.err.println("Database not found in project, expecting at: " + defaultPath);
+        return "jdbc:ucanaccess://" + defaultPath;
     }
     
     /**
@@ -103,6 +146,7 @@ public class DBConnection {
         } catch (SQLException e) {
             System.err.println("Database Connection failed: " + e.getMessage());
             System.err.println("Kiểm tra đường dẫn file Access (.accdb hoặc .mdb)");
+            System.err.println("Current URL: " + databaseUrl);
             throw e;
         }
         return connection;
@@ -181,5 +225,13 @@ public class DBConnection {
             pool[i] = null;
         }
         poolCount = 0;
+    }
+    
+    /**
+     * Get current database URL (for debugging)
+     * @return database URL string
+     */
+    public static String getDatabaseUrl() {
+        return databaseUrl;
     }
 }

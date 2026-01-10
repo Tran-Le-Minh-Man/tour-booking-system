@@ -12,7 +12,6 @@ import java.io.IOException;
 
 /**
  * Servlet for Admin Dashboard
- * Author: MiniMax Agent
  */
 @WebServlet("/Admin/Dashboard")
 public class AdminDashboardServlet extends HttpServlet {

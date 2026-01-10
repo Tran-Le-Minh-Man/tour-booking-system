@@ -12,7 +12,6 @@ import java.io.IOException;
 
 /**
  * Servlet for handling user logout
- * Author: MiniMax Agent
  */
 @WebServlet("/LogoutServlet")
 public class LogoutServlet extends HttpServlet {

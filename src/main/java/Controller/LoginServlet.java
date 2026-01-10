@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Servlet for handling user login
  * Enhanced with improved security features
- * Author: MiniMax Agent
  */
 @WebServlet("/LoginServlet")
 public class LoginServlet extends HttpServlet {

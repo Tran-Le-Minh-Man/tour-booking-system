@@ -22,7 +22,6 @@ import java.util.Map;
 
 /**
  * Servlet for Revenue Reports (Admin)
- * Author: MiniMax Agent
  */
 @WebServlet("/Admin/RevenueServlet")
 public class RevenueServlet extends HttpServlet {

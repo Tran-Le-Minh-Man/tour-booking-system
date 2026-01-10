@@ -5,7 +5,6 @@ import org.mindrot.jbcrypt.BCrypt;
 /**
  * Password utility class for secure password handling using BCrypt
  * Provides centralized password validation logic
- * Author: MiniMax Agent
  */
 public class PasswordUtil {
     // BCrypt work factor (higher = more secure but slower)

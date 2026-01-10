@@ -17,7 +17,6 @@ import Model.User;
 
 /**
  * Filter to protect admin pages
- * Author: MiniMax Agent
  */
 @WebFilter("/Admin/*")
 public class AdminAuthFilter implements Filter {

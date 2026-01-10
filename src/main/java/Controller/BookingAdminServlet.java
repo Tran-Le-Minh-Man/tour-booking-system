@@ -16,7 +16,6 @@ import java.util.List;
 
 /**
  * Servlet for managing bookings (Admin)
- * Author: MiniMax Agent
  */
 @WebServlet("/Admin/BookingServlet")
 public class BookingAdminServlet extends HttpServlet {

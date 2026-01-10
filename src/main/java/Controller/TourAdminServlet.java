@@ -18,7 +18,6 @@ import java.util.List;
 
 /**
  * Servlet for managing tours (Admin)
- * Author: MiniMax Agent
  */
 @WebServlet("/Admin/TourServlet")
 public class TourAdminServlet extends HttpServlet {

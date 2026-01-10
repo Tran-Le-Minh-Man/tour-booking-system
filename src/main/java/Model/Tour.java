@@ -6,7 +6,6 @@ import java.util.Objects;
 
 /**
  * Tour model class
- * Author: MiniMax Agent
  */
 public class Tour {
     private int tourId;
