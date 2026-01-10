@@ -29,6 +29,15 @@
 
 					<c:when test="${not empty sessionScope.user}">
 
+						<!-- Hiển thị menu Admin nếu người dùng có quyền ADMIN -->
+						<c:if test="${sessionScope.user.role == 'ADMIN'}">
+							<li><a
+								href="${pageContext.request.contextPath}/Admin/Dashboard"
+								class="${fn:contains(current, 'AdminDashboard.jsp') ? 'active' : ''}">
+									<i class="fas fa-cogs"></i> Hệ thống Admin
+							</a></li>
+						</c:if>
+
 						<li><a
 							href="${pageContext.request.contextPath}/LogoutServlet"> Đăng
 								xuất </a></li>

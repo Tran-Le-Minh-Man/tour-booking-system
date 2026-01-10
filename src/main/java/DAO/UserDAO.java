@@ -124,7 +124,7 @@ public class UserDAO {
         // Hash the password before storing
         String hashedPassword = PasswordUtil.hashPassword(plainPassword);
         
-        String sql = "INSERT INTO " + TABLE_NAME + " (email, password_hash, full_name, phone, role) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO " + TABLE_NAME + " (email, password_hash, full_name, phone, role, created_at) VALUES (?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -134,6 +134,7 @@ public class UserDAO {
             stmt.setString(3, sanitizeString(user.getFullName()));
             stmt.setString(4, sanitizeString(user.getPhone()));
             stmt.setString(5, user.getRole() != null ? user.getRole() : "USER");
+            stmt.setTimestamp(6, new java.sql.Timestamp(System.currentTimeMillis()));
             
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
@@ -234,10 +235,12 @@ public class UserDAO {
         
         user.setRole(rs.getString("role"));
         
-        // Handle created_at (Date/Time in Access)
+        // Handle created_at (Date/Time in Access) - đảm bảo không null
         java.sql.Timestamp createdAt = rs.getTimestamp("created_at");
         if (createdAt != null) {
             user.setCreatedAt(createdAt.toString());
+        } else {
+            user.setCreatedAt("");
         }
         
         return user;

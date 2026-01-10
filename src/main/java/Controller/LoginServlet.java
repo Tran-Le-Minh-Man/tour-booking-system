@@ -241,10 +241,14 @@ public class LoginServlet extends HttpServlet {
 
     /**
      * Store remember token in database
+     * Note: Tạm thời bỏ qua nếu cột không tồn tại trong database
      */
     private void storeRememberToken(int userId, String token) {
-        // In production, create a separate table for remember tokens
-        // This is a simplified implementation
+        // Tạm thời bỏ qua chức năng remember me do cột không tồn tại trong database
+        System.err.println("Remember me feature temporarily disabled - columns not found in database");
+        
+        // Nếu muốn kích hoạt sau này, cần thêm 2 cột: remember_token (Text) và token_expiry (Date/Time)
+        /*
         String sql = "UPDATE users SET remember_token = ?, token_expiry = ? WHERE id = ?";
         
         try (Connection conn = DBConnection.getConnection();
@@ -259,12 +263,18 @@ public class LoginServlet extends HttpServlet {
         } catch (SQLException e) {
             System.err.println("Error storing remember token: " + e.getMessage());
         }
+        */
     }
 
     /**
      * Check for remember me cookie and auto-login
+     * Note: Tạm thời vô hiệu hóa do cột không tồn tại trong database
      */
     private String checkRememberMeCookie(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
+        // Tạm thời bỏ qua remember me - không kiểm tra cookie
+        return null;
+        
+        /*
         if (session == null) return "Session error";
 
         Cookie[] cookies = request.getCookies();
@@ -309,12 +319,18 @@ public class LoginServlet extends HttpServlet {
         }
 
         return null;
+        */
     }
 
     /**
      * Validate remember token against database
+     * Note: Tạm thời vô hiệu hóa do cột không tồn tại trong database
      */
     private User validateRememberToken(String token) {
+        // Tạm thời trả về null - không thực hiện auto-login
+        return null;
+        
+        /*
         String sql = "SELECT id, email, password_hash, full_name, phone, role, created_at " +
                      "FROM users WHERE remember_token = ? AND token_expiry > ?";
         
@@ -350,6 +366,7 @@ public class LoginServlet extends HttpServlet {
         }
         
         return null;
+        */
     }
 
     /**
