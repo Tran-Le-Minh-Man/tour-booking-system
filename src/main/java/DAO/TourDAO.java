@@ -321,6 +321,114 @@ public class TourDAO {
     }
     
     /**
+     * Get filtered tours based on various criteria
+     * @param destination the destination to filter (null for all)
+     * @param minPrice the minimum price (null for no minimum)
+     * @param maxPrice the maximum price (null for no maximum)
+     * @param duration the duration in days (null for all)
+     * @return list of filtered tours
+     */
+    public List<Tour> getFilteredTours(String destination, String minPrice, 
+                                        String maxPrice, String duration) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM " + TABLE_NAME + " WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+        
+        // Filter by destination
+        if (destination != null && !destination.trim().isEmpty() && !destination.equals("all")) {
+            sql.append(" AND destination LIKE ?");
+            params.add("%" + destination.trim() + "%");
+        }
+        
+        // Filter by minimum price
+        if (minPrice != null && !minPrice.trim().isEmpty()) {
+            try {
+                double minPriceValue = Double.parseDouble(minPrice.trim());
+                sql.append(" AND price >= ?");
+                params.add(minPriceValue);
+            } catch (NumberFormatException e) {
+                // Ignore invalid price values
+            }
+        }
+        
+        // Filter by maximum price
+        if (maxPrice != null && !maxPrice.trim().isEmpty()) {
+            try {
+                double maxPriceValue = Double.parseDouble(maxPrice.trim());
+                sql.append(" AND price <= ?");
+                params.add(maxPriceValue);
+            } catch (NumberFormatException e) {
+                // Ignore invalid price values
+            }
+        }
+        
+        // Filter by duration
+        if (duration != null && !duration.trim().isEmpty() && !duration.equals("all")) {
+            try {
+                int durationValue = Integer.parseInt(duration.trim());
+                sql.append(" AND duration = ?");
+                params.add(durationValue);
+            } catch (NumberFormatException e) {
+                // Ignore invalid duration values
+            }
+        }
+        
+        sql.append(" AND status = 'ACTIVE' ORDER BY id DESC");
+        
+        List<Tour> tours = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            
+            for (int i = 0; i < params.size(); i++) {
+                if (params.get(i) instanceof String) {
+                    stmt.setString(i + 1, (String) params.get(i));
+                } else if (params.get(i) instanceof Double) {
+                    stmt.setDouble(i + 1, (Double) params.get(i));
+                } else if (params.get(i) instanceof Integer) {
+                    stmt.setInt(i + 1, (Integer) params.get(i));
+                }
+            }
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    tours.add(mapResultSetToTour(rs));
+                }
+            }
+            
+        } catch (SQLException e) {
+            throw new TourDAOException("getFilteredTours", "Error fetching filtered tours", e);
+        }
+        
+        return tours;
+    }
+    
+    /**
+     * Get all unique destinations
+     * @return list of unique destination names
+     */
+    public List<String> getAllDestinations() {
+        String sql = "SELECT DISTINCT destination FROM " + TABLE_NAME + " WHERE status = 'ACTIVE' ORDER BY destination";
+        List<String> destinations = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            while (rs.next()) {
+                String dest = rs.getString("destination");
+                if (dest != null && !dest.trim().isEmpty()) {
+                    destinations.add(dest.trim());
+                }
+            }
+            
+        } catch (SQLException e) {
+            throw new TourDAOException("getAllDestinations", "Error fetching destinations", e);
+        }
+        
+        return destinations;
+    }
+    
+    /**
      * Map ResultSet to Tour object
      */
     private Tour mapResultSetToTour(ResultSet rs) throws SQLException {
