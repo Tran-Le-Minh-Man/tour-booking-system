@@ -36,7 +36,7 @@
 					và cát trắng</p>
 
 
-				<form action="${pageContext.request.contextPath}/SearchTourServlet"
+				<form action="${pageContext.request.contextPath}/TourListServlet"
 					method="get" class="search-form">
 					<div class="input-group">
 						<input type="text" name="destination"
