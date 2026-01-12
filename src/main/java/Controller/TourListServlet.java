@@ -29,26 +29,32 @@ public class TourListServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        // Get search and filter parameters
+
+        // Get all parameters from request
         String searchKeyword = request.getParameter("keyword");
         String destination = request.getParameter("destination");
+        String departureDate = request.getParameter("departure_date");
         String minPrice = request.getParameter("minPrice");
         String maxPrice = request.getParameter("maxPrice");
         String duration = request.getParameter("duration");
         String sortBy = request.getParameter("sortBy");
 
-		List<Tour> tours;
+        List<Tour> tours;
 
-        // If there's a search keyword, search by keyword
-        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
-            tours = tourDAO.searchTours(searchKeyword.trim());
-        } 
-        // If there are filters applied
-        else if (destination != null || minPrice != null || maxPrice != null || duration != null) {
-            tours = tourDAO.getFilteredTours(destination, minPrice, maxPrice, duration);
+        // Priority 1: Homepage search (destination from hero section)
+        if (destination != null && !destination.trim().isEmpty()) {
+            // Use destination as keyword for search
+            tours = tourDAO.searchTours(destination.trim());
         }
-        // Otherwise get all active tours
+        // Priority 2: Search by keyword
+        else if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            tours = tourDAO.searchTours(searchKeyword.trim());
+        }
+        // Priority 3: Filter by other criteria
+        else if (minPrice != null || maxPrice != null || duration != null) {
+            tours = tourDAO.getFilteredTours(null, minPrice, maxPrice, duration);
+        }
+        // Priority 4: Get all active tours
         else {
             tours = tourDAO.getActiveTours();
         }
@@ -64,12 +70,13 @@ public class TourListServlet extends HttpServlet {
         // Set attributes for JSP
         request.setAttribute("tours", tours);
         request.setAttribute("destinations", destinations);
-        request.setAttribute("searchKeyword", searchKeyword);
+        request.setAttribute("searchKeyword", (destination != null && !destination.trim().isEmpty()) ? destination : searchKeyword);
         request.setAttribute("selectedDestination", destination);
         request.setAttribute("selectedMinPrice", minPrice);
         request.setAttribute("selectedMaxPrice", maxPrice);
         request.setAttribute("selectedDuration", duration);
         request.setAttribute("selectedSortBy", sortBy);
+        request.setAttribute("departureDate", departureDate);
 
         // Forward to JSP page
         request.getRequestDispatcher("tour-list.jsp").forward(request, response);
