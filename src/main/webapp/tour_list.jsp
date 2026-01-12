@@ -73,8 +73,8 @@
 
 							<!-- Departure Date filter -->
 							<div class="filter-group">
-								<label for="departure_date">Ngày khởi hành</label> <input
-									type="date" id="departure_date" name="departure_date"
+								<label for="departure_date">Ngày khởi hành</label>
+								<input type="date" id="departure_date" name="departure_date"
 									value="${departureDate}">
 							</div>
 
@@ -194,8 +194,8 @@
 										<div class="tour-image">
 											<c:choose>
 												<c:when test="${not empty tour.imageUrl}">
-													<img src="${tour.imageUrl}" alt="${tour.name}"
-														onerror="this.src='https://via.placeholder.com/400x300?text=${fn:replace(tour.destination,' ','+')}'">
+													<img src="${pageContext.request.contextPath}/${tour.imageUrl}" alt="${tour.name}"
+														onerror="this.onerror=null;this.src='https://via.placeholder.com/400x300?text=${fn:replace(tour.destination,' ','+')}'">
 												</c:when>
 												<c:otherwise>
 													<img
@@ -204,13 +204,13 @@
 												</c:otherwise>
 											</c:choose>
 											<c:if
-												test="${tour.getAvailableSlots() <= 5 && tour.getAvailableSlots() > 0}">
+												test="${tour.availableSlots <= 5 && tour.availableSlots > 0}">
 												<div class="tour-badge badge-warning">
-													<i class="fas fa-fire"></i> Còn ${tour.getAvailableSlots()}
+													<i class="fas fa-fire"></i> Còn ${tour.availableSlots}
 													chỗ
 												</div>
 											</c:if>
-											<c:if test="${tour.getAvailableSlots() == 0}">
+											<c:if test="${tour.availableSlots == 0}">
 												<div class="tour-badge badge-danger">
 													<i class="fas fa-times"></i> Hết chỗ
 												</div>
@@ -226,7 +226,7 @@
 											<div class="tour-details">
 												<div class="detail-item">
 													<i class="far fa-calendar-alt"></i> <span>Khởi hành:
-														${tour.getFormattedDepartureDate()}</span>
+														${tour.formattedDepartureDate}</span>
 												</div>
 												<div class="detail-item">
 													<i class="fas fa-clock"></i> <span>${tour.duration}
@@ -234,7 +234,7 @@
 												</div>
 												<div class="detail-item">
 													<i class="fas fa-users"></i> <span>Còn
-														${tour.getAvailableSlots()} chỗ</span>
+														${tour.availableSlots} chỗ</span>
 												</div>
 											</div>
 											<div class="tour-footer">
@@ -284,14 +284,6 @@
 				function() {
 					document.querySelector('.nav-menu').classList
 							.toggle('active');
-				});
-
-		// Auto-submit form on select change
-		document.querySelectorAll('.filter-form select').forEach(
-				function(select) {
-					select.addEventListener('change', function() {
-						this.form.submit();
-					});
 				});
 	</script>
 </body>
