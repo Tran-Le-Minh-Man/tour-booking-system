@@ -71,6 +71,13 @@
 								</select>
 							</div>
 
+							<!-- Departure Date filter -->
+							<div class="filter-group">
+								<label for="departure_date">Ngày khởi hành</label> <input
+									type="date" id="departure_date" name="departure_date"
+									value="${departureDate}">
+							</div>
+
 							<!-- Price range filter -->
 							<div class="filter-group">
 								<label>Khoảng giá</label>

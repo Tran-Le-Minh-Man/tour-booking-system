@@ -1,8 +1,5 @@
 package Controller;
 
-import java.io.IOException;
-import java.util.List;
-
 import DAO.TourDAO;
 import Model.Tour;
 import jakarta.servlet.ServletException;
@@ -11,6 +8,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Servlet for displaying and filtering tour list
@@ -50,9 +49,9 @@ public class TourListServlet extends HttpServlet {
         else if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
             tours = tourDAO.searchTours(searchKeyword.trim());
         }
-        // Priority 3: Filter by other criteria
-        else if (minPrice != null || maxPrice != null || duration != null) {
-            tours = tourDAO.getFilteredTours(null, minPrice, maxPrice, duration);
+        // Priority 3: Filter by other criteria (including departure date)
+        else if (minPrice != null || maxPrice != null || duration != null || departureDate != null) {
+            tours = tourDAO.getFilteredTours(null, minPrice, maxPrice, duration, departureDate);
         }
         // Priority 4: Get all active tours
         else {
@@ -79,7 +78,7 @@ public class TourListServlet extends HttpServlet {
         request.setAttribute("departureDate", departureDate);
 
         // Forward to JSP page
-        request.getRequestDispatcher("tour-list.jsp").forward(request, response);
+        request.getRequestDispatcher("tour_list.jsp").forward(request, response);
     }
 
     @Override

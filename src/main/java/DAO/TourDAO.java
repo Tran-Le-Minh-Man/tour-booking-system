@@ -326,10 +326,11 @@ public class TourDAO {
      * @param minPrice the minimum price (null for no minimum)
      * @param maxPrice the maximum price (null for no maximum)
      * @param duration the duration in days (null for all)
+     * @param departureDate the departure date to filter (null for all)
      * @return list of filtered tours
      */
     public List<Tour> getFilteredTours(String destination, String minPrice, 
-                                        String maxPrice, String duration) {
+                                        String maxPrice, String duration, String departureDate) {
         StringBuilder sql = new StringBuilder("SELECT * FROM " + TABLE_NAME + " WHERE 1=1");
         List<Object> params = new ArrayList<>();
         
@@ -369,6 +370,17 @@ public class TourDAO {
                 params.add(durationValue);
             } catch (NumberFormatException e) {
                 // Ignore invalid duration values
+            }
+        }
+        
+        // Filter by departure date
+        if (departureDate != null && !departureDate.trim().isEmpty()) {
+            try {
+                java.sql.Date dateValue = java.sql.Date.valueOf(departureDate.trim());
+                sql.append(" AND departure_date >= ?");
+                params.add(dateValue);
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid date format
             }
         }
         
