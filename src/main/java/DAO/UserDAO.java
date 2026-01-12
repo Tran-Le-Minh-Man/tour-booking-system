@@ -504,6 +504,79 @@ public class UserDAO {
     }
     
     /**
+     * Update user remember token
+     * @param userId the user ID
+     * @param token the remember token
+     * @param expiryDate the expiry date for the token
+     * @return true if update successful
+     */
+    public boolean updateRememberToken(int userId, String token, java.sql.Timestamp expiryDate) {
+        String sql = "UPDATE " + TABLE_NAME + " SET remember_token = ?, token_expiry = ? WHERE id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, token);
+            stmt.setTimestamp(2, expiryDate);
+            stmt.setInt(3, userId);
+            
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            throw new UserDAOException("updateRememberToken", "Error updating remember token", e);
+        }
+    }
+    
+    /**
+     * Clear user remember token (logout)
+     * @param userId the user ID
+     * @return true if update successful
+     */
+    public boolean clearRememberToken(int userId) {
+        String sql = "UPDATE " + TABLE_NAME + " SET remember_token = NULL, token_expiry = NULL WHERE id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, userId);
+            
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            throw new UserDAOException("clearRememberToken", "Error clearing remember token", e);
+        }
+    }
+    
+    /**
+     * Find user by remember token
+     * @param token the remember token
+     * @return User object if found and token valid, null otherwise
+     */
+    public User findByRememberToken(String token) {
+        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE remember_token = ? AND token_expiry > ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, token);
+            stmt.setTimestamp(2, new java.sql.Timestamp(System.currentTimeMillis()));
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToUser(rs);
+                }
+            }
+            
+        } catch (SQLException e) {
+            throw new UserDAOException("findByRememberToken", "Error finding user by remember token", e);
+        }
+        
+        return null;
+    }
+    
+    /**
      * Sanitize string for database queries
      */
     private String sanitizeString(String str) {

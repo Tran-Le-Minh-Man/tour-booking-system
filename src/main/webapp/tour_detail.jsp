@@ -93,7 +93,7 @@
 									</div>
 									<div class="meta-item">
 										<i class="fas fa-clock"></i> 
-										<span>Thời gian: <strong>${tour.duration} ngày ${tour.duration > 1 ? tour.duration - 1 + ' đêm' : ''}</strong></span>
+										<span>Thời gian: <strong>${tour.duration} ngày<c:if test="${tour.duration > 1}"> ${tour.duration - 1} đêm</c:if></strong></span>
 									</div>
 									<div class="meta-item">
 										<i class="fas fa-users"></i> 
