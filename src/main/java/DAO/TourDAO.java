@@ -321,7 +321,8 @@ public class TourDAO {
     }
     
     /**
-     * Get filtered tours based on various criteria
+     * Get filtered tours based on various criteria including keyword search
+     * @param keyword the keyword to search in tour name and description (null for all)
      * @param destination the destination to filter (null for all)
      * @param minPrice the minimum price (null for no minimum)
      * @param maxPrice the maximum price (null for no maximum)
@@ -329,10 +330,18 @@ public class TourDAO {
      * @param departureDate the departure date to filter (null for all)
      * @return list of filtered tours
      */
-    public List<Tour> getFilteredTours(String destination, String minPrice, 
+    public List<Tour> getFilteredTours(String keyword, String destination, String minPrice, 
                                         String maxPrice, String duration, String departureDate) {
         StringBuilder sql = new StringBuilder("SELECT * FROM " + TABLE_NAME + " WHERE 1=1");
         List<Object> params = new ArrayList<>();
+        
+        // Filter by keyword (search in name and description)
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND (name LIKE ? OR description LIKE ?)");
+            String searchPattern = "%" + keyword.trim() + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
         
         // Filter by destination
         if (destination != null && !destination.trim().isEmpty() && !destination.equals("all")) {
@@ -391,13 +400,15 @@ public class TourDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
             
-            for (int i = 0; i < params.size(); i++) {
+        	for (int i = 0; i < params.size(); i++) {
                 if (params.get(i) instanceof String) {
                     stmt.setString(i + 1, (String) params.get(i));
                 } else if (params.get(i) instanceof Double) {
                     stmt.setDouble(i + 1, (Double) params.get(i));
                 } else if (params.get(i) instanceof Integer) {
                     stmt.setInt(i + 1, (Integer) params.get(i));
+                } else if (params.get(i) instanceof java.sql.Date) {
+                    stmt.setDate(i + 1, (java.sql.Date) params.get(i));
                 }
             }
             

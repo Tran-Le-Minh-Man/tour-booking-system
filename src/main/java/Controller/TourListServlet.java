@@ -2,7 +2,6 @@ package Controller;
 
 import DAO.TourDAO;
 import Model.Tour;
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -31,7 +30,7 @@ public class TourListServlet extends HttpServlet {
             throws ServletException, IOException {
 
         // Get all parameters from request
-        String searchKeyword = request.getParameter("keyword");
+        String keyword = request.getParameter("keyword");
         String destination = request.getParameter("destination");
         String departureDate = request.getParameter("departure_date");
         String minPrice = request.getParameter("minPrice");
@@ -41,26 +40,34 @@ public class TourListServlet extends HttpServlet {
 
         List<Tour> tours;
 
-        // Priority 1: Homepage search (destination from hero section)
-        if (destination != null && !destination.trim().isEmpty()) {
-            // Use destination as keyword for search
-            tours = tourDAO.searchTours(destination.trim());
-        }
-        // Priority 2: Search by keyword
-        else if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
-            tours = tourDAO.searchTours(searchKeyword.trim());
-        }
-        // Priority 3: Filter by other criteria (including departure date)
-        else if (minPrice != null || maxPrice != null || duration != null || departureDate != null) {
-            tours = tourDAO.getFilteredTours(null, minPrice, maxPrice, duration, departureDate);
-        }
-        // Priority 4: Get all active tours
-        else {
+        // Determine if any filter is active
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        boolean hasDestination = destination != null && !destination.trim().isEmpty() && !destination.equals("all");
+        boolean hasDepartureDate = departureDate != null && !departureDate.trim().isEmpty();
+        boolean hasMinPrice = minPrice != null && !minPrice.trim().isEmpty();
+        boolean hasMaxPrice = maxPrice != null && !maxPrice.trim().isEmpty();
+        boolean hasDuration = duration != null && !duration.trim().isEmpty() && !duration.equals("all");
+        
+        boolean hasAnyFilter = hasKeyword || hasDestination || hasDepartureDate || hasMinPrice || hasMaxPrice || hasDuration;
+
+        // Apply filters
+        if (hasAnyFilter) {
+            // Use combined filter - parameters must match DAO method signature: keyword, destination, minPrice, maxPrice, duration, departureDate
+            tours = tourDAO.getFilteredTours(
+                hasKeyword ? keyword : null,
+                hasDestination ? destination : null,
+                hasMinPrice ? minPrice : null,
+                hasMaxPrice ? maxPrice : null,
+                hasDuration ? duration : null,
+                hasDepartureDate ? departureDate : null
+            );
+        } else {
+            // Get all active tours
             tours = tourDAO.getActiveTours();
         }
 
         // Apply sorting if specified
-        if (sortBy != null && !sortBy.isEmpty()) {
+        if (sortBy != null && !sortBy.isEmpty() && !sortBy.equals("default")) {
             tours = sortTours(tours, sortBy);
         }
 
@@ -70,7 +77,7 @@ public class TourListServlet extends HttpServlet {
         // Set attributes for JSP
         request.setAttribute("tours", tours);
         request.setAttribute("destinations", destinations);
-        request.setAttribute("searchKeyword", (destination != null && !destination.trim().isEmpty()) ? destination : searchKeyword);
+        request.setAttribute("searchKeyword", keyword);
         request.setAttribute("selectedDestination", destination);
         request.setAttribute("selectedMinPrice", minPrice);
         request.setAttribute("selectedMaxPrice", maxPrice);
