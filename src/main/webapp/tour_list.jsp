@@ -204,13 +204,13 @@
 												</c:otherwise>
 											</c:choose>
 											<c:if
-												test="${tour.availableSlots() <= 5 && tour.availableSlots() > 0}">
+												test="${tour.getAvailableSlots() <= 5 && tour.getAvailableSlots() > 0}">
 												<div class="tour-badge badge-warning">
-													<i class="fas fa-fire"></i> Còn ${tour.availableSlots()}
+													<i class="fas fa-fire"></i> Còn ${tour.getAvailableSlots()}
 													chỗ
 												</div>
 											</c:if>
-											<c:if test="${tour.availableSlots() == 0}">
+											<c:if test="${tour.getAvailableSlots() == 0}">
 												<div class="tour-badge badge-danger">
 													<i class="fas fa-times"></i> Hết chỗ
 												</div>
@@ -226,7 +226,7 @@
 											<div class="tour-details">
 												<div class="detail-item">
 													<i class="far fa-calendar-alt"></i> <span>Khởi hành:
-														${tour.formattedDepartureDate}</span>
+														${tour.getFormattedDepartureDate()}</span>
 												</div>
 												<div class="detail-item">
 													<i class="fas fa-clock"></i> <span>${tour.duration}
@@ -234,7 +234,7 @@
 												</div>
 												<div class="detail-item">
 													<i class="fas fa-users"></i> <span>Còn
-														${tour.availableSlots()} chỗ</span>
+														${tour.getAvailableSlots()} chỗ</span>
 												</div>
 											</div>
 											<div class="tour-footer">
