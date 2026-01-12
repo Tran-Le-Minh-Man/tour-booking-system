@@ -400,7 +400,7 @@ public class TourDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
             
-        	for (int i = 0; i < params.size(); i++) {
+            for (int i = 0; i < params.size(); i++) {
                 if (params.get(i) instanceof String) {
                     stmt.setString(i + 1, (String) params.get(i));
                 } else if (params.get(i) instanceof Double) {
@@ -449,6 +449,43 @@ public class TourDAO {
         }
         
         return destinations;
+    }
+    
+    /**
+     * Get related tours by destination (excluding current tour)
+     * @param destination the destination to match
+     * @param currentTourId the current tour ID to exclude
+     * @param limit maximum number of related tours to return
+     * @return list of related tours
+     */
+    public List<Tour> getRelatedTours(String destination, int currentTourId, int limit) {
+        if (destination == null || destination.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        String sql = "SELECT TOP ? * FROM " + TABLE_NAME + 
+                     " WHERE destination LIKE ? AND id != ? AND status = 'ACTIVE' " +
+                     "ORDER BY id DESC";
+        List<Tour> tours = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, limit);
+            stmt.setString(2, "%" + destination.trim() + "%");
+            stmt.setInt(3, currentTourId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    tours.add(mapResultSetToTour(rs));
+                }
+            }
+            
+        } catch (SQLException e) {
+            throw new TourDAOException("getRelatedTours", "Error fetching related tours", e);
+        }
+        
+        return tours;
     }
     
     /**
