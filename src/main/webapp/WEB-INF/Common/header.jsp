@@ -47,7 +47,7 @@
 								<i class="fas fa-chevron-down"></i>
 							</a>
 							<div class="dropdown-menu">
-								<a href="${pageContext.request.contextPath}/ProfileServlet">
+								<a href="${pageContext.request.contextPath}/Edit_Profile">
 									<i class="fas fa-user-edit"></i> Chỉnh sửa thông tin
 								</a>
 								<a href="${pageContext.request.contextPath}/LogoutServlet">
