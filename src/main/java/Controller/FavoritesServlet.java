@@ -48,7 +48,7 @@ public class FavoritesServlet extends HttpServlet {
             // Get user's favorite tours
             List<Tour> favorites = favoritesDAO.getUserFavorites(user.getUserId());
             request.setAttribute("favorites", favorites);
-            request.getRequestDispatcher("WEB-INF/Client/favorites.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/Client/Favorites.jsp").forward(request, response);
         } else if ("count".equals(action)) {
             // Get favorite count (for header badge)
             int count = favoritesDAO.getFavoriteCount(user.getUserId());
@@ -58,7 +58,7 @@ public class FavoritesServlet extends HttpServlet {
             // Default: show favorites list
             List<Tour> favorites = favoritesDAO.getUserFavorites(user.getUserId());
             request.setAttribute("favorites", favorites);
-            request.getRequestDispatcher("WEB-INF/Client/favorites.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/Client/Favorites.jsp").forward(request, response);
         }
     }
 
@@ -97,13 +97,21 @@ public class FavoritesServlet extends HttpServlet {
         }
         
         try {
+            System.out.println("=== FavoritesServlet ===");
+            System.out.println("Action: " + action);
+            System.out.println("TourId: " + tourId);
+            System.out.println("User: " + (user != null ? user.getEmail() : "NULL"));
+            
             if ("toggle".equals(action)) {
                 // Toggle favorite status
                 boolean isNowFavorite = favoritesDAO.toggleFavorite(user.getUserId(), tourId);
                 int newCount = favoritesDAO.getFavoriteCount(user.getUserId());
                 
+                System.out.println("Toggle result - isFavorite: " + isNowFavorite + ", count: " + newCount);
+                
                 response.getWriter().write("{\"status\":\"success\"," +
                     "\"isFavorite\":" + isNowFavorite + "," +
+                    "\"message\":\"" + (isNowFavorite ? "Đã thêm vào yêu thích!" : "Đã xóa khỏi yêu thích!") + "\"," +
                     "\"count\":" + newCount + "}");
                 
             } else if ("add".equals(action)) {
@@ -111,8 +119,11 @@ public class FavoritesServlet extends HttpServlet {
                 boolean added = favoritesDAO.addFavorite(user.getUserId(), tourId);
                 int newCount = favoritesDAO.getFavoriteCount(user.getUserId());
                 
+                System.out.println("Add result - added: " + added + ", count: " + newCount);
+                
                 response.getWriter().write("{\"status\":\"success\"," +
                     "\"added\":" + added + "," +
+                    "\"message\":\"Đã thêm vào yêu thích!\"," +
                     "\"count\":" + newCount + "}");
                 
             } else if ("remove".equals(action)) {
@@ -120,20 +131,25 @@ public class FavoritesServlet extends HttpServlet {
                 boolean removed = favoritesDAO.removeFavorite(user.getUserId(), tourId);
                 int newCount = favoritesDAO.getFavoriteCount(user.getUserId());
                 
+                System.out.println("Remove result - removed: " + removed + ", count: " + newCount);
+                
                 response.getWriter().write("{\"status\":\"success\"," +
                     "\"removed\":" + removed + "," +
+                    "\"message\":\"Đã xóa khỏi yêu thích!\"," +
                     "\"count\":" + newCount + "}");
                 
             } else if ("check".equals(action)) {
                 // Check if tour is favorited
                 boolean isFav = favoritesDAO.isFavorite(user.getUserId(), tourId);
-                response.getWriter().write("{\"status\":\"success\",\"isFavorite\":" + isFav + "}");
+                response.getWriter().write("{\"status\":\"success\",\"isFavorite\":" + isFav + ",\"message\":\"OK\"}");
                 
             } else {
                 response.getWriter().write("{\"status\":\"error\",\"message\":\"Hành động không hợp lệ\"}");
             }
             
         } catch (Exception e) {
+            System.err.println("FavoritesServlet Error: " + e.getMessage());
+            e.printStackTrace();
             response.getWriter().write("{\"status\":\"error\",\"message\":\"Có lỗi xảy ra: " + e.getMessage() + "\"}");
         }
     }

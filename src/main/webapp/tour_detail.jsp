@@ -88,7 +88,7 @@
 									<!-- Favorite Button -->
 									<c:choose>
 										<c:when test="${not empty sessionScope.user}">
-											<button class="btn-favorite ${isFavorite ? 'active' : ''}" 
+											<button type="button" class="btn-favorite ${isFavorite ? 'active' : ''}" 
 													data-tour-id="${tour.tourId}"
 													title="${isFavorite ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}">
 												<i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
@@ -417,11 +417,19 @@
 				document.querySelector('.nav-menu')?.classList.toggle('active');
 			});
 			
-			// Favorite button functionality
+			// Favorite button functionality - with proper event handling to prevent page jump
 			const favoriteBtn = document.querySelector('.btn-favorite[data-tour-id]');
 			if (favoriteBtn) {
 				favoriteBtn.addEventListener('click', function(e) {
+					// Stop propagation to prevent any parent form submission
+					e.stopPropagation();
 					e.preventDefault();
+					
+					// Check if already processing
+					if (this.style.pointerEvents === 'none') {
+						return;
+					}
+					
 					const tourId = this.dataset.tourId;
 					const isActive = this.classList.contains('active');
 					const action = isActive ? 'remove' : 'add';
@@ -432,21 +440,33 @@
 					this.style.opacity = '0.7';
 					this.style.pointerEvents = 'none';
 					
-					// Send AJAX request
-					fetch('${pageContext.request.contextPath}/FavoritesServlet?action=' + action + '&tourId=' + tourId)
-						.then(response => response.json())
+					// Send AJAX request using POST for better security
+					fetch('${pageContext.request.contextPath}/FavoritesServlet', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+						},
+						body: 'action=' + action + '&tourId=' + tourId
+					})
+						.then(response => {
+							// Check if response is OK before parsing JSON
+							if (!response.ok) {
+								throw new Error('Network response was not ok');
+							}
+							return response.json();
+						})
 						.then(data => {
-							if (data.success) {
-								// Toggle button state
-								this.classList.toggle('active');
-								
-								// Update icon and text
-								if (this.classList.contains('active')) {
+							console.log('Favorites response:', data);
+							if (data.status === 'success') {
+								// Toggle button state based on response
+								if (data.isFavorite === true || data.added === true) {
+									this.classList.add('active');
 									icon.classList.remove('far');
 									icon.classList.add('fas');
 									textSpan.textContent = 'Đã thích';
 									this.title = 'Bỏ yêu thích';
 								} else {
+									this.classList.remove('active');
 									icon.classList.remove('fas');
 									icon.classList.add('far');
 									textSpan.textContent = 'Yêu thích';
@@ -454,9 +474,12 @@
 								}
 								
 								// Show notification
-								showNotification(data.message, 'success');
+								showNotification(data.message || 'Thao tác thành công!', 'success');
+							} else if (data.status === 'error' && data.redirect) {
+								// Redirect to login if required
+								window.location.href = data.redirect;
 							} else {
-								showNotification(data.message, 'error');
+								showNotification(data.message || 'Có lỗi xảy ra!', 'error');
 							}
 						})
 						.catch(error => {
@@ -468,7 +491,7 @@
 							this.style.opacity = '1';
 							this.style.pointerEvents = 'auto';
 						});
-				});
+					});
 			}
 			
 			// Notification function

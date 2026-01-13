@@ -84,6 +84,6 @@ public class LogoutServlet extends HttpServlet {
         
         // Redirect to login page with success message
         String contextPath = request.getContextPath();
-        response.sendRedirect(contextPath + "/LoginServlet?logout=success");
+        response.sendRedirect(contextPath + "/HomePage.jsp?logout=success");
     }
 }

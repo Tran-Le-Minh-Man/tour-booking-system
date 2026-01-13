@@ -25,7 +25,7 @@
 </head>
 <body>
 	<!-- ========== IMPORT HEADER ========== -->
-	<jsp:include page="WEB-INF/Common/header.jsp" />
+	<jsp:include page="/WEB-INF/Common/header.jsp" />
 
 	<!-- Page Header -->
 	<section class="page-header">
