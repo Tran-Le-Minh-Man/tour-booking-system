@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class BookingDAO {
     
-    private static final String TABLE_NAME = "bookings";
+    private static final String TABLE_NAME = "Bookings";
     
     /**
      * Custom exception for database operations

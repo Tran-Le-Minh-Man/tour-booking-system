@@ -120,6 +120,58 @@
     margin-bottom: 15px;
 }
 
+.tour-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* Favorite Button */
+.btn-favorite {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid #e74c3c;
+    background: transparent;
+    color: #e74c3c;
+}
+
+.btn-favorite:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-favorite.active {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-favorite i {
+    font-size: 1.1rem;
+}
+
+.btn-favorite.active i.far::before {
+    content: "\f004";
+}
+
+.btn-favorite .favorite-text {
+    transition: opacity 0.3s;
+}
+
+.btn-favorite:hover .favorite-text {
+    opacity: 0.9;
+}
+
 .tour-title {
     font-size: 2rem;
     font-weight: 700;

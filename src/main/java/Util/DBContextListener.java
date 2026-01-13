@@ -1,5 +1,7 @@
 package Util;
 
+import java.sql.SQLException;
+
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
@@ -31,6 +33,14 @@ public class DBContextListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+        // Force commit all pending transactions before closing
+        try {
+			DBConnection.forceCommit();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
         // Close all connections when context is destroyed
         DBConnection.closePool();
         System.out.println("Database pool closed.");

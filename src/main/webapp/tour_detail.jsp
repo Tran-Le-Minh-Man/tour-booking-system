@@ -81,8 +81,28 @@
 
 							<!-- Tour Info Header -->
 							<div class="tour-detail-header">
-								<div class="tour-destination-badge">
-									<i class="fas fa-map-marker-alt"></i> ${tour.destination}
+								<div class="tour-header-top">
+									<div class="tour-destination-badge">
+										<i class="fas fa-map-marker-alt"></i> ${tour.destination}
+									</div>
+									<!-- Favorite Button -->
+									<c:choose>
+										<c:when test="${not empty sessionScope.user}">
+											<button class="btn-favorite ${isFavorite ? 'active' : ''}" 
+													data-tour-id="${tour.tourId}"
+													title="${isFavorite ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}">
+												<i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
+												<span class="favorite-text">${isFavorite ? 'Đã thích' : 'Yêu thích'}</span>
+											</button>
+										</c:when>
+										<c:otherwise>
+											<a href="${pageContext.request.contextPath}/LoginServlet?redirect=${pageContext.request.requestURL}?tourId=${tour.tourId}" 
+											   class="btn-favorite" title="Đăng nhập để yêu thích">
+												<i class="far fa-heart"></i>
+												<span class="favorite-text">Yêu thích</span>
+											</a>
+										</c:otherwise>
+									</c:choose>
 								</div>
 								<h1 class="tour-title">${tour.name}</h1>
 								
@@ -396,6 +416,87 @@
 			document.querySelector('.nav-toggle')?.addEventListener('click', function() {
 				document.querySelector('.nav-menu')?.classList.toggle('active');
 			});
+			
+			// Favorite button functionality
+			const favoriteBtn = document.querySelector('.btn-favorite[data-tour-id]');
+			if (favoriteBtn) {
+				favoriteBtn.addEventListener('click', function(e) {
+					e.preventDefault();
+					const tourId = this.dataset.tourId;
+					const isActive = this.classList.contains('active');
+					const action = isActive ? 'remove' : 'add';
+					const icon = this.querySelector('i');
+					const textSpan = this.querySelector('.favorite-text');
+					
+					// Show loading state
+					this.style.opacity = '0.7';
+					this.style.pointerEvents = 'none';
+					
+					// Send AJAX request
+					fetch('${pageContext.request.contextPath}/FavoritesServlet?action=' + action + '&tourId=' + tourId)
+						.then(response => response.json())
+						.then(data => {
+							if (data.success) {
+								// Toggle button state
+								this.classList.toggle('active');
+								
+								// Update icon and text
+								if (this.classList.contains('active')) {
+									icon.classList.remove('far');
+									icon.classList.add('fas');
+									textSpan.textContent = 'Đã thích';
+									this.title = 'Bỏ yêu thích';
+								} else {
+									icon.classList.remove('fas');
+									icon.classList.add('far');
+									textSpan.textContent = 'Yêu thích';
+									this.title = 'Thêm vào yêu thích';
+								}
+								
+								// Show notification
+								showNotification(data.message, 'success');
+							} else {
+								showNotification(data.message, 'error');
+							}
+						})
+						.catch(error => {
+							console.error('Error:', error);
+							showNotification('Có lỗi xảy ra. Vui lòng thử lại.', 'error');
+						})
+						.finally(() => {
+							// Remove loading state
+							this.style.opacity = '1';
+							this.style.pointerEvents = 'auto';
+						});
+				});
+			}
+			
+			// Notification function
+			function showNotification(message, type) {
+				// Create notification element
+				const notification = document.createElement('div');
+				notification.className = 'notification notification-' + type;
+				notification.innerHTML = '<i class="fas ' + (type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle') + '"></i><span>' + message + '</span>';
+				
+				// Add styles
+				notification.style.cssText = 'position: fixed;top: 100px;right: 20px;padding: 15px 25px;border-radius: 8px;color: white;font-weight: 500;display: flex;align-items: center;gap: 10px;z-index: 9999;animation: slideIn 0.3s ease;' + (type === 'success' ? 'background: #27ae60;' : 'background: #e74c3c;');
+				
+				// Add animation keyframes
+				if (!document.getElementById('notification-styles')) {
+					const style = document.createElement('style');
+					style.id = 'notification-styles';
+					style.textContent = '@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } } @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }';
+					document.head.appendChild(style);
+				}
+				
+				document.body.appendChild(notification);
+				
+				// Remove after 3 seconds
+				setTimeout(() => {
+					notification.style.animation = 'slideOut 0.3s ease forwards';
+					setTimeout(() => notification.remove(), 300);
+				}, 3000);
+			}
 		});
 	</script>
 </body>

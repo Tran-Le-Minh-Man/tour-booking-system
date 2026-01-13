@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class TourDAO {
     
-    private static final String TABLE_NAME = "tours";
+    private static final String TABLE_NAME = "Tours";
     
     /**
      * Custom exception for database operations

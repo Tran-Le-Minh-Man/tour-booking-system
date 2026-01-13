@@ -97,6 +97,10 @@ public class UserDAO {
     public User findByEmail(String email) {
         String sql = "SELECT * FROM " + TABLE_NAME + " WHERE email = ?";
         
+        System.out.println("=== USERDAO FIND BY EMAIL ===");
+        System.out.println("Searching for email: " + email.toLowerCase().trim());
+        System.out.println("Database URL: " + DBConnection.getDatabaseUrl());
+        
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
@@ -104,11 +108,15 @@ public class UserDAO {
             
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
+                    System.out.println("User found! ID: " + rs.getInt("id") + ", Email: " + rs.getString("email"));
                     return mapResultSetToUser(rs);
+                } else {
+                    System.out.println("User NOT found in database");
                 }
             }
             
         } catch (SQLException e) {
+            System.err.println("findByEmail error: " + e.getMessage());
             throw new UserDAOException("findByEmail", "Error finding user by email", e);
         }
         
@@ -122,6 +130,10 @@ public class UserDAO {
      * @return User object if credentials valid, null otherwise
      */
     public User verifyLogin(String email, String password) {
+        System.out.println("=== USERDAO VERIFY LOGIN ===");
+        System.out.println("Email: " + email);
+        System.out.println("Database URL: " + DBConnection.getDatabaseUrl());
+        
         String sql = "SELECT * FROM " + TABLE_NAME + " WHERE email = ?";
         
         try (Connection conn = DBConnection.getConnection();
@@ -135,15 +147,23 @@ public class UserDAO {
                     
                     // Get stored password hash
                     String storedHash = rs.getString("password_hash");
+                    System.out.println("Found user: " + user.getEmail());
+                    System.out.println("Stored hash: " + (storedHash != null ? storedHash.substring(0, Math.min(10, storedHash.length())) + "..." : "NULL"));
                     
                     // Verify password using BCrypt
                     if (checkPassword(password, storedHash)) {
+                        System.out.println("Password verified successfully!");
                         return user;
+                    } else {
+                        System.out.println("Password verification FAILED");
                     }
+                } else {
+                    System.out.println("User NOT found in database");
                 }
             }
             
         } catch (SQLException e) {
+            System.err.println("verifyLogin error: " + e.getMessage());
             throw new UserDAOException("verifyLogin", "Error verifying login", e);
         }
         
@@ -254,25 +274,116 @@ public class UserDAO {
      */
     public boolean insert(User user) {
         String sql = "INSERT INTO " + TABLE_NAME + 
-                     " (email, password_hash, full_name, phone, role, created_at) " +
-                     "VALUES (?, ?, ?, ?, ?, ?)";
+                     " (email, password_hash, full_name, phone, role, created_at, remember_token, token_expiry) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        System.out.println("=== USERDAO INSERT DEBUG ===");
+        System.out.println("Database URL: " + DBConnection.getDatabaseUrl());
+        System.out.println("UserDAO.insert - Email: " + user.getEmail());
+        System.out.println("UserDAO.insert - Password hash: " + (user.getHashedPassword() != null ? user.getHashedPassword().substring(0, Math.min(10, user.getHashedPassword().length())) + "..." : "NULL"));
+        System.out.println("UserDAO.insert - FullName: " + user.getFullName());
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        
+        try {
+            conn = DBConnection.getConnection();
+            System.out.println("Connection obtained: " + (conn != null));
+            System.out.println("AutoCommit: " + conn.getAutoCommit());
+            
+            stmt = conn.prepareStatement(sql);
             
             stmt.setString(1, user.getEmail().toLowerCase().trim());
-            stmt.setString(2, user.getPassword()); // Already hashed
+            stmt.setString(2, user.getHashedPassword());
             stmt.setString(3, sanitizeString(user.getFullName()));
             stmt.setString(4, sanitizeString(user.getPhone()));
             stmt.setString(5, user.getRole() != null ? user.getRole() : "USER");
             stmt.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+            stmt.setString(7, null);
+            stmt.setTimestamp(8, null);
             
+            System.out.println("Executing insert...");
             int rowsAffected = stmt.executeUpdate();
+            System.out.println("Rows affected: " + rowsAffected);
+            
+            // ALWAYS force commit to ensure data is written to file
+            if (rowsAffected > 0) {
+                try {
+                    conn.commit();
+                    System.out.println("FORCE COMMIT executed - data saved to database file");
+                    
+                    // Verify the insert by reading back
+                    if (verifyUserExists(user.getEmail())) {
+                        System.out.println("VERIFIED: User exists in database after insert");
+                    } else {
+                        System.err.println("WARNING: User NOT found after insert! Data may be lost!");
+                    }
+                } catch (SQLException commitEx) {
+                    System.err.println("Commit failed: " + commitEx.getMessage());
+                }
+            }
+            
+            System.out.println("=== INSERT SUCCESS ===");
             return rowsAffected > 0;
             
         } catch (SQLException e) {
+            System.err.println("=== INSERT FAILED ===");
+            System.err.println("SQLException: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Try to rollback if something went wrong
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                    System.err.println("Rolled back transaction");
+                } catch (SQLException rollbackEx) {
+                    System.err.println("Rollback failed: " + rollbackEx.getMessage());
+                }
+            }
+            
             throw new UserDAOException("insert", "Error inserting user", e);
+        } finally {
+            // Close statement
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                    System.out.println("Statement closed");
+                } catch (SQLException e) {
+                    System.err.println("Error closing statement: " + e.getMessage());
+                }
+            }
+            // Release connection back to pool
+            if (conn != null) {
+                DBConnection.releaseConnection(conn);
+                System.out.println("Connection released");
+            }
         }
+    }
+    
+    /**
+     * Verify user exists in database after insert
+     */
+    private boolean verifyUserExists(String email) {
+        String sql = "SELECT COUNT(*) as cnt FROM " + TABLE_NAME + " WHERE email = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, email.toLowerCase().trim());
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt("cnt");
+                    System.out.println("Verification - User count for " + email + ": " + count);
+                    return count > 0;
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Verification failed: " + e.getMessage());
+        }
+        
+        return false;
     }
     
     /**
@@ -498,6 +609,16 @@ public class UserDAO {
             user.setCreatedAt(createdAt.toString());
         } else {
             user.setCreatedAt("");
+        }
+        
+        // Map remember_token and token_expiry
+        user.setRememberToken(rs.getString("remember_token"));
+        
+        Timestamp tokenExpiry = rs.getTimestamp("token_expiry");
+        if (tokenExpiry != null) {
+            user.setTokenExpiry(tokenExpiry.toString());
+        } else {
+            user.setTokenExpiry(null);
         }
         
         return user;

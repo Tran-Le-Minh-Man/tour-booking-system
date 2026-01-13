@@ -1,5 +1,6 @@
 package Controller;
 
+import DAO.FavoritesDAO;
 import DAO.TourDAO;
 import Model.Tour;
 import Model.User;
@@ -20,11 +21,13 @@ import java.util.List;
 public class TourDetailServlet extends HttpServlet {
 
     private TourDAO tourDAO;
+    private FavoritesDAO favoritesDAO;
 
     @Override
     public void init() throws ServletException {
         super.init();
         tourDAO = new TourDAO();
+        favoritesDAO = new FavoritesDAO();
     }
 
     @Override
@@ -61,14 +64,26 @@ public class TourDetailServlet extends HttpServlet {
         // Fetch related tours (same destination, excluding current tour)
         List<Tour> relatedTours = tourDAO.getRelatedTours(tour.getDestination(), tour.getTourId(), 4);
         
-        // Check if user is logged in
+        // Check if user is logged in and get user object
         HttpSession session = request.getSession(false);
         boolean isLoggedIn = (session != null && session.getAttribute("user") != null);
+        User user = null;
+        
+        if (isLoggedIn) {
+            user = (User) session.getAttribute("user");
+        }
+        
+        // Check if tour is in user's favorites
+        boolean isFavorite = false;
+        if (isLoggedIn && user != null) {
+            isFavorite = favoritesDAO.isFavorite(user.getUserId(), tourId);
+        }
         
         // Set attributes for JSP
         request.setAttribute("tour", tour);
         request.setAttribute("relatedTours", relatedTours);
         request.setAttribute("isLoggedIn", isLoggedIn);
+        request.setAttribute("isFavorite", isFavorite);
         
         // Forward to JSP page
         request.getRequestDispatcher("tour_detail.jsp").forward(request, response);

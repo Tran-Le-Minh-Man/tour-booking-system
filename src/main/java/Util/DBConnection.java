@@ -1,5 +1,6 @@
 package Util;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,50 +45,82 @@ public class DBConnection {
     
     /**
      * Get database URL - lazy initialization
+     * SMART SEARCH: Find DomesticTourHub project in any location, then follow fixed path structure
+     * Works on ANY machine - only the part before "DomesticTourHub" varies
      */
     private static String findDatabaseUrl() {
-        // Try 1: Use ServletContext to get real path (best for web apps)
-        if (servletContext != null) {
-            String realPath = servletContext.getRealPath("/WEB-INF/db/" + DB_FILE_NAME);
-            if (realPath != null && Files.exists(Paths.get(realPath))) {
-                System.out.println("Using database from ServletContext: " + realPath);
-                return "jdbc:ucanaccess://" + realPath;
-            }
-        }
-        
-        // Try 2: Common workspace locations
         String userName = System.getProperty("user.name");
-        String[][] possiblePaths = {
-            // Standard Eclipse workspace
-            {"C:/Users", userName + "/eclipse-workspace/DomesticTourHub/src/main/webapp/WEB-INF/db/" + DB_FILE_NAME},
-            {"C:/Users", userName + "/eclipse-workspace/tour-booking-system/src/main/webapp/WEB-INF/db/" + DB_FILE_NAME},
-            // D drive
-            {"D:/eclipse-workspace", "/DomesticTourHub/src/main/webapp/WEB-INF/db/" + DB_FILE_NAME},
-            {"D:/Users", userName + "/eclipse-workspace/DomesticTourHub/src/main/webapp/WEB-INF/db/" + DB_FILE_NAME},
-            // Current directory based
-            {System.getProperty("user.dir"), "/src/main/webapp/WEB-INF/db/" + DB_FILE_NAME},
-            {System.getProperty("user.dir"), "/../src/main/webapp/WEB-INF/db/" + DB_FILE_NAME},
+        String userDir = System.getProperty("user.dir");
+        String os = System.getProperty("os.name").toLowerCase();
+        
+        System.out.println("=== Finding Database (Smart Search) ===");
+        System.out.println("User: " + userName);
+        System.out.println("UserDir: " + userDir);
+        System.out.println("OS: " + os);
+        
+        // SMART STRATEGY: Search for DomesticTourHub in common parent directories
+        String[] parentDirs = {
+            // Windows common locations
+            "C:/Users/" + userName + "/eclipse-workspace",
+            "C:/Users/" + userName + "/Documents/workspace",
+            "D:/eclipse-workspace",
+            "D:/Users/" + userName + "/eclipse-workspace",
+            userDir,
+            userDir + "/..",
+            System.getProperty("user.home") + "/workspace",
         };
         
-        for (String[] pathInfo : possiblePaths) {
-            String baseDir = pathInfo[0];
-            String relativePath = pathInfo[1];
-            String fullPath = baseDir + relativePath;
+        String dbFileName = DB_FILE_NAME;
+        String dbRelativePath = "src/main/webapp/WEB-INF/db/" + dbFileName;
+        String dbAlternativePath = "WebContent/WEB-INF/db/" + dbFileName; // For older projects
+        
+        // Search for database file
+        for (String parent : parentDirs) {
+            parent = parent.replace("/", java.io.File.separator).replace("\\", java.io.File.separator);
             
-            // Handle both Windows and Unix paths
-            fullPath = fullPath.replace("/", java.io.File.separator).replace("\\", java.io.File.separator);
+            // Try path 1: src/main/webapp/WEB-INF/db/
+            String fullPath1 = parent + java.io.File.separator + "DomesticTourHub" + java.io.File.separator + dbRelativePath;
+            Path path1 = Paths.get(fullPath1);
+            if (Files.exists(path1)) {
+                String absolutePath = path1.toAbsolutePath().toString();
+                System.out.println("✓ FOUND: " + absolutePath);
+                return "jdbc:ucanaccess://" + absolutePath;
+            }
             
-            Path dbPath = Paths.get(fullPath);
-            if (Files.exists(dbPath)) {
-                String absolutePath = dbPath.toAbsolutePath().toString();
-                System.out.println("Found database at: " + absolutePath);
+            // Try path 2: WebContent/WEB-INF/db/ (older project structure)
+            String fullPath2 = parent + java.io.File.separator + "DomesticTourHub" + java.io.File.separator + dbAlternativePath;
+            Path path2 = Paths.get(fullPath2);
+            if (Files.exists(path2)) {
+                String absolutePath = path2.toAbsolutePath().toString();
+                System.out.println("✓ FOUND: " + absolutePath);
                 return "jdbc:ucanaccess://" + absolutePath;
             }
         }
         
-        // Last resort
-        System.err.println("WARNING: Database file not found! Using default path.");
-        return "jdbc:ucanaccess://" + System.getProperty("user.dir") + "/WEB-INF/db/" + DB_FILE_NAME;
+        // FALLBACK: Use servletContext real path (temporary deployed files)
+        // This will show a WARNING because data will be lost on restart
+        if (servletContext != null) {
+            String realPath = servletContext.getRealPath("/WEB-INF/db/" + dbFileName);
+            if (realPath != null && Files.exists(Paths.get(realPath))) {
+                System.err.println("⚠ WARNING: Project database not found!");
+                System.err.println("⚠ Expected structure: [any-path]/DomesticTourHub/src/main/webapp/WEB-INF/db/" + dbFileName);
+                System.err.println("⚠ Using TEMPORARY deployed database: " + realPath);
+                System.err.println("⚠ DATA WILL BE LOST when server restarts!");
+                return "jdbc:ucanaccess://" + realPath;
+            }
+        }
+        
+        // Last resort - return default path
+        String defaultPath = userDir + java.io.File.separator + ".." + java.io.File.separator + 
+                           "DomesticTourHub" + java.io.File.separator + dbRelativePath;
+        defaultPath = new File(defaultPath).getAbsolutePath();
+        
+        System.err.println("✗ ERROR: Database file not found!");
+        System.err.println("✗ Please ensure database exists at:");
+        System.err.println("✗   [your-workspace]/DomesticTourHub/src/main/webapp/WEB-INF/db/" + dbFileName);
+        System.err.println("✗ Falling back to: " + defaultPath);
+        
+        return "jdbc:ucanaccess://" + defaultPath;
     }
     
     /**
@@ -135,6 +168,9 @@ public class DBConnection {
             connection.setAutoCommit(true);
             DriverManager.setLoginTimeout(CONNECTION_TIMEOUT / 1000);
             
+            // Force commit immediately
+            connection.setAutoCommit(true);
+            
         } catch (ClassNotFoundException e) {
             System.err.println("Access Driver not found: " + e.getMessage());
             throw new SQLException("Access Driver not found", e);
@@ -144,6 +180,26 @@ public class DBConnection {
             throw e;
         }
         return connection;
+    }
+    
+    /**
+     * Force commit all pending transactions and sync to disk
+     * @throws SQLException 
+     */
+    public static synchronized void forceCommit() throws SQLException {
+        System.out.println("=== DBConnection FORCE COMMIT ===");
+        for (int i = 0; i < poolCount; i++) {
+            if (pool[i] != null && !pool[i].isClosed()) {
+                try {
+                    if (!pool[i].getAutoCommit()) {
+                        pool[i].commit();
+                        System.out.println("Committed connection " + i);
+                    }
+                } catch (SQLException e) {
+                    System.err.println("Error committing connection " + i + ": " + e.getMessage());
+                }
+            }
+        }
     }
     
     /**

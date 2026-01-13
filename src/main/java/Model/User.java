@@ -13,6 +13,8 @@ public class User {
     private String phone;
     private String role;
     private String createdAt;
+    private String rememberToken;
+    private String tokenExpiry;
     
     public User() {}
     
@@ -43,18 +45,18 @@ public class User {
         this.email = (email != null) ? email.trim().toLowerCase() : null; 
     }
     
-    // Password getter returns null for security
+    // Password getter returns null for security (except for internal use)
     public String getPassword() { 
-        return null; // Never return actual password
+        return null; // Never return actual password in normal usage
+    }
+    
+    // Overloaded method to get password for DAO operations
+    public String getHashedPassword() { 
+        return password;
     }
     
     public void setPassword(String password) { 
         this.password = (password != null) ? password : null; 
-    }
-    
-    // Internal method to access password for authentication
-    public String getRawPassword() {
-        return password;
     }
     
     public String getPhone() { return phone; }
@@ -70,6 +72,16 @@ public class User {
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { 
         this.createdAt = createdAt; 
+    }
+    
+    public String getRememberToken() { return rememberToken; }
+    public void setRememberToken(String rememberToken) { 
+        this.rememberToken = rememberToken; 
+    }
+    
+    public String getTokenExpiry() { return tokenExpiry; }
+    public void setTokenExpiry(String tokenExpiry) { 
+        this.tokenExpiry = tokenExpiry; 
     }
     
     @Override
