@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class BookingDAO {
     
-    private static final String TABLE_NAME = "Bookings";
+    private static final String TABLE_NAME = "bookings";
     
     /**
      * Custom exception for database operations
@@ -198,6 +198,131 @@ public class BookingDAO {
         }
         
         return null;
+    }
+    
+    /**
+     * Get bookings by user ID
+     */
+    public List<Booking> getBookingsByUserId(int userId) {
+        String sql = "SELECT b.*, u.full_name as user_name, u.email as user_email, " +
+                     "t.name as tour_name, t.destination as tour_destination, t.image_url as tour_image, " +
+                     "t.departure_date as tour_departure, t.duration as tour_duration, t.price as tour_price " +
+                     "FROM " + TABLE_NAME + " b " +
+                     "LEFT JOIN users u ON b.user_id = u.id " +
+                     "LEFT JOIN tours t ON b.tour_id = t.id " +
+                     "WHERE b.user_id = ? " +
+                     "ORDER BY b.id DESC";
+        
+        List<Booking> bookings = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, userId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    bookings.add(mapResultSetToBooking(rs));
+                }
+            }
+            
+        } catch (SQLException e) {
+            throw new BookingDAOException("getBookingsByUserId", "Error fetching bookings by user ID", e);
+        }
+        
+        return bookings;
+    }
+    
+    /**
+     * Get bookings by user ID and status
+     */
+    public List<Booking> getBookingsByUserIdAndStatus(int userId, String status) {
+        String sql = "SELECT b.*, u.full_name as user_name, u.email as user_email, " +
+                     "t.name as tour_name, t.destination as tour_destination, t.image_url as tour_image, " +
+                     "t.departure_date as tour_departure, t.duration as tour_duration, t.price as tour_price " +
+                     "FROM " + TABLE_NAME + " b " +
+                     "LEFT JOIN users u ON b.user_id = u.id " +
+                     "LEFT JOIN tours t ON b.tour_id = t.id " +
+                     "WHERE b.user_id = ? AND b.status = ? " +
+                     "ORDER BY b.id DESC";
+        
+        List<Booking> bookings = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, userId);
+            stmt.setString(2, status);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    bookings.add(mapResultSetToBooking(rs));
+                }
+            }
+            
+        } catch (SQLException e) {
+            throw new BookingDAOException("getBookingsByUserIdAndStatus", "Error fetching bookings by user ID and status", e);
+        }
+        
+        return bookings;
+    }
+    
+    /**
+     * Create a new booking
+     */
+    public int createBooking(Booking booking) {
+        String sql = "INSERT INTO " + TABLE_NAME + " (user_id, tour_id, booking_date, status, num_participants, total_price, notes) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            
+            stmt.setInt(1, booking.getUserId());
+            stmt.setInt(2, booking.getTourId());
+            stmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            stmt.setString(4, booking.getStatus() != null ? booking.getStatus() : "PENDING");
+            stmt.setInt(5, booking.getNumParticipants());
+            stmt.setBigDecimal(6, booking.getTotalPrice());
+            stmt.setString(7, booking.getNotes());
+            
+            int rowsAffected = stmt.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                ResultSet generatedKeys = stmt.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                }
+            }
+            
+        } catch (SQLException e) {
+            throw new BookingDAOException("createBooking", "Error creating booking", e);
+        }
+        
+        return 0;
+    }
+    
+    /**
+     * Get count of user bookings
+     */
+    public int countByUserId(int userId) {
+        String sql = "SELECT COUNT(*) FROM " + TABLE_NAME + " WHERE user_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, userId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+            
+        } catch (SQLException e) {
+            throw new BookingDAOException("countByUserId", "Error counting user bookings", e);
+        }
+        
+        return 0;
     }
     
     /**
@@ -419,6 +544,16 @@ public class BookingDAO {
         booking.setUserEmail(rs.getString("user_email"));
         booking.setTourName(rs.getString("tour_name"));
         booking.setTourDestination(rs.getString("tour_destination"));
+        
+        // Tour detail fields (may be null for some queries)
+        try {
+            booking.setTourImage(rs.getString("tour_image"));
+            booking.setTourDeparture(rs.getString("tour_departure"));
+            booking.setTourDuration(rs.getInt("tour_duration"));
+            booking.setTourPrice(rs.getBigDecimal("tour_price"));
+        } catch (SQLException e) {
+            // Field may not exist in all queries, ignore
+        }
         
         return booking;
     }

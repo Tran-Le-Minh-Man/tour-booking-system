@@ -22,6 +22,10 @@ public class Booking {
     private String userEmail;
     private String tourName;
     private String tourDestination;
+    private String tourImage;
+    private String tourDeparture;
+    private int tourDuration;
+    private java.math.BigDecimal tourPrice;
     
     public Booking() {}
     
@@ -78,6 +82,18 @@ public class Booking {
     
     public String getTourDestination() { return tourDestination; }
     public void setTourDestination(String tourDestination) { this.tourDestination = tourDestination; }
+    
+    public String getTourImage() { return tourImage; }
+    public void setTourImage(String tourImage) { this.tourImage = tourImage; }
+    
+    public String getTourDeparture() { return tourDeparture; }
+    public void setTourDeparture(String tourDeparture) { this.tourDeparture = tourDeparture; }
+    
+    public int getTourDuration() { return tourDuration; }
+    public void setTourDuration(int tourDuration) { this.tourDuration = tourDuration; }
+    
+    public java.math.BigDecimal getTourPrice() { return tourPrice; }
+    public void setTourPrice(java.math.BigDecimal tourPrice) { this.tourPrice = tourPrice; }
     
     // Helper methods
     public boolean isPending() {

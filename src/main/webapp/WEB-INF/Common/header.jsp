@@ -35,7 +35,7 @@
 								<i class="fas fa-heart"></i> Yêu thích
 						</a></li>
 
-						<li><a href="${pageContext.request.contextPath}/CartServlet"
+						<li><a href="${pageContext.request.contextPath}/BookingServlet"
 							class="${fn:contains(current, 'cart') ? 'active' : ''}">
 								<i class="fas fa-shopping-cart"></i> Giỏ hàng
 						</a></li>
