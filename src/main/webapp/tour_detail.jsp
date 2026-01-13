@@ -222,31 +222,45 @@
 									</div>
 								</div>
 
-								<c:choose>
-									<c:when test="${tour.availableSlots > 0}">
-										<form action="${pageContext.request.contextPath}/BookingServlet" method="get" class="booking-form">
-											<input type="hidden" name="tourId" value="${tour.tourId}">
-											<div class="quantity-selector">
-												<label for="quantity">Số người lớn</label>
-												<div class="quantity-input">
-													<button type="button" class="qty-btn minus">-</button>
-													<input type="number" id="quantity" name="quantity" value="1" min="1" max="${tour.availableSlots}">
-													<button type="button" class="qty-btn plus">+</button>
-												</div>
+									<c:choose>
+										<c:when test="${tour.availableSlots > 0}">
+											<c:choose>
+												<c:when test="${isLoggedIn}">
+													<form action="${pageContext.request.contextPath}/BookingServlet" method="get" class="booking-form">
+														<input type="hidden" name="tourId" value="${tour.tourId}">
+														<div class="quantity-selector">
+															<label for="quantity">Số người lớn</label>
+															<div class="quantity-input">
+																<button type="button" class="qty-btn minus">-</button>
+																<input type="number" id="quantity" name="quantity" value="1" min="1" max="${tour.availableSlots}">
+																<button type="button" class="qty-btn plus">+</button>
+															</div>
+														</div>
+														<button type="submit" class="btn-booking">
+															<i class="fas fa-shopping-cart"></i> ĐẶT TOUR NGAY
+														</button>
+													</form>
+												</c:when>
+												<c:otherwise>
+													<div class="login-notice">
+														<i class="fas fa-user-lock"></i>
+														<h4>Vui lòng đăng nhập để đặt tour</h4>
+														<p>Bạn cần đăng nhập để tiến hành đặt tour này.</p>
+														<a href="${pageContext.request.contextPath}/LoginServlet?redirect=${pageContext.request.requestURL}?tourId=${tour.tourId}" class="btn-login-booking">
+															<i class="fas fa-sign-in-alt"></i> Đăng nhập ngay
+														</a>
+													</div>
+												</c:otherwise>
+											</c:choose>
+										</c:when>
+										<c:otherwise>
+											<div class="sold-out-notice">
+												<i class="fas fa-times-circle"></i>
+												<h4>Tour đã hết chỗ</h4>
+												<p>Rất tiếc, tour này đã kín chỗ. Vui lòng chọn tour khác hoặc liên hệ để được tư vấn.</p>
 											</div>
-											<button type="submit" class="btn-booking">
-												<i class="fas fa-shopping-cart"></i> ĐẶT TOUR NGAY
-											</button>
-										</form>
-									</c:when>
-									<c:otherwise>
-										<div class="sold-out-notice">
-											<i class="fas fa-times-circle"></i>
-											<h4>Tour đã hết chỗ</h4>
-											<p>Rất tiếc, tour này đã kín chỗ. Vui lòng chọn tour khác hoặc liên hệ để được tư vấn.</p>
-										</div>
-									</c:otherwise>
-								</c:choose>
+										</c:otherwise>
+									</c:choose>
 
 								<div class="booking-guarantee">
 									<div class="guarantee-item">

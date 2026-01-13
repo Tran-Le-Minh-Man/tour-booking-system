@@ -220,7 +220,7 @@ public class LoginServlet extends HttpServlet {
                 storeRememberToken(user.getUserId(), rememberToken);
                 
                 // Create secure cookie
-                Cookie rememberCookie = new Cookie("remember_token", rememberToken);
+                Cookie rememberCookie = new Cookie("auth_token", rememberToken);
                 rememberCookie.setMaxAge(REMEMBER_ME_COOKIE_MAX_AGE);
                 rememberCookie.setPath("/");
                 rememberCookie.setHttpOnly(true);
@@ -228,8 +228,15 @@ public class LoginServlet extends HttpServlet {
                 response.addCookie(rememberCookie);
             }
 
-            // Redirect to home page
-            response.sendRedirect(request.getContextPath() + "/HomePage.jsp");
+            // Check for redirect URL and redirect if exists
+            String redirectUrl = (String) session.getAttribute("redirectUrl");
+            if (redirectUrl != null && !redirectUrl.isEmpty()) {
+                session.removeAttribute("redirectUrl");
+                response.sendRedirect(redirectUrl);
+            } else {
+                // Redirect to home page
+                response.sendRedirect(request.getContextPath() + "/HomePage.jsp");
+            }
 
         } catch (Exception e) {
             System.err.println("Login error: " + e.getMessage());
@@ -240,19 +247,14 @@ public class LoginServlet extends HttpServlet {
 
     /**
      * Store remember token in database
-     * Note: Tạm thời bỏ qua nếu cột không tồn tại trong database
      */
     private void storeRememberToken(int userId, String token) {
-        // Tạm thời bỏ qua chức năng remember me do cột không tồn tại trong database
-        System.err.println("Remember me feature temporarily disabled - columns not found in database");
-        
-        // Nếu muốn kích hoạt sau này, cần thêm 2 cột: remember_token (Text) và token_expiry (Date/Time)
-        /*
-        String sql = "UPDATE users SET remember_token = ?, token_expiry = ? WHERE id = ?";
+        String sql = "UPDATE " + "users" + " SET remember_token = ?, token_expiry = ? WHERE id = ?";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
+            // Token expires in 30 days
             long expiryTime = System.currentTimeMillis() + (REMEMBER_ME_COOKIE_MAX_AGE * 1000L);
             stmt.setString(1, token);
             stmt.setTimestamp(2, new java.sql.Timestamp(expiryTime));
@@ -262,25 +264,19 @@ public class LoginServlet extends HttpServlet {
         } catch (SQLException e) {
             System.err.println("Error storing remember token: " + e.getMessage());
         }
-        */
     }
 
     /**
      * Check for remember me cookie and auto-login
-     * Note: Tạm thời vô hiệu hóa do cột không tồn tại trong database
      */
     private String checkRememberMeCookie(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
-        // Tạm thời bỏ qua remember me - không kiểm tra cookie
-        return null;
-        
-        /*
         if (session == null) return "Session error";
 
         Cookie[] cookies = request.getCookies();
         if (cookies == null) return null;
 
         for (Cookie cookie : cookies) {
-            if ("remember_token".equals(cookie.getName())) {
+            if ("auth_token".equals(cookie.getName())) {
                 String token = cookie.getValue();
                 
                 if (token == null || token.isEmpty()) {
@@ -291,13 +287,15 @@ public class LoginServlet extends HttpServlet {
                 User user = validateRememberToken(token);
                 
                 if (user != null) {
+                    // Store user in session
                     session.setAttribute("user", user);
-                    // Update token for security
+                    
+                    // Update token for security (token rotation)
                     String newToken = generateSecureToken();
                     storeRememberToken(user.getUserId(), newToken);
                     
                     // Update cookie with new token
-                    Cookie newCookie = new Cookie("remember_token", newToken);
+                    Cookie newCookie = new Cookie("auth_token", newToken);
                     newCookie.setMaxAge(REMEMBER_ME_COOKIE_MAX_AGE);
                     newCookie.setPath("/");
                     newCookie.setHttpOnly(true);
@@ -318,54 +316,13 @@ public class LoginServlet extends HttpServlet {
         }
 
         return null;
-        */
     }
 
     /**
      * Validate remember token against database
-     * Note: Tạm thời vô hiệu hóa do cột không tồn tại trong database
      */
     private User validateRememberToken(String token) {
-        // Tạm thời trả về null - không thực hiện auto-login
-        return null;
-        
-        /*
-        String sql = "SELECT id, email, password_hash, full_name, phone, role, created_at " +
-                     "FROM users WHERE remember_token = ? AND token_expiry > ?";
-        
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, token);
-            stmt.setTimestamp(2, new java.sql.Timestamp(System.currentTimeMillis()));
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    User user = new User();
-                    user.setUserId(rs.getInt("id"));
-                    user.setEmail(rs.getString("email"));
-                    user.setPassword(rs.getString("password_hash"));
-                    user.setFullName(rs.getString("full_name"));
-                    
-                    String phone = rs.getString("phone");
-                    user.setPhone(phone != null ? phone : "");
-                    
-                    user.setRole(rs.getString("role"));
-                    
-                    java.sql.Timestamp createdAt = rs.getTimestamp("created_at");
-                    if (createdAt != null) {
-                        user.setCreatedAt(createdAt.toString());
-                    }
-                    
-                    return user;
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error validating remember token: " + e.getMessage());
-        }
-        
-        return null;
-        */
+        return userDAO.findByRememberToken(token);
     }
 
     /**

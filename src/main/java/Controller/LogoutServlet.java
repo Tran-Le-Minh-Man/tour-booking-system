@@ -1,5 +1,8 @@
 package Controller;
 
+import DAO.UserDAO;
+import Model.User;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.Cookie;
@@ -16,12 +19,19 @@ import java.io.IOException;
 @WebServlet("/LogoutServlet")
 public class LogoutServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+    private UserDAO userDAO;
 
     /**
      * @see HttpServlet#HttpServlet()
      */
     public LogoutServlet() {
         super();
+        userDAO = new UserDAO();
+    }
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
     }
 
     /**
@@ -47,16 +57,22 @@ public class LogoutServlet extends HttpServlet {
             throws IOException {
         HttpSession session = request.getSession(false);
         
-        // Invalidate session
+        // Clear remember token from database if user is logged in
         if (session != null) {
+            User user = (User) session.getAttribute("user");
+            if (user != null) {
+                userDAO.clearRememberToken(user.getUserId());
+            }
+            
+            // Invalidate session
             session.invalidate();
         }
         
-        // Clear remember me cookie
+        // Clear auth_token cookie
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("remember_token".equals(cookie.getName())) {
+                if ("auth_token".equals(cookie.getName())) {
                     cookie.setValue("");
                     cookie.setMaxAge(0);
                     cookie.setPath("/");
@@ -66,8 +82,8 @@ public class LogoutServlet extends HttpServlet {
             }
         }
         
-        // Redirect to HomePage instead of Login
+        // Redirect to login page with success message
         String contextPath = request.getContextPath();
-        response.sendRedirect(contextPath + "/HomePage.jsp");
+        response.sendRedirect(contextPath + "/LoginServlet?logout=success");
     }
 }
