@@ -3,12 +3,18 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%
+	String contextPath = request.getContextPath();
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${not empty tour ? tour.name : 'Chi Tiết Tour'} - Vietnam Travel</title>
+<script>
+	var CONTEXT_PATH = '<%= contextPath %>';
+</script>
 
 <!-- Google Fonts -->
 <link
@@ -246,7 +252,8 @@
 										<c:when test="${tour.availableSlots > 0}">
 											<c:choose>
 												<c:when test="${isLoggedIn}">
-													<form action="${pageContext.request.contextPath}/BookingServlet" method="get" class="booking-form">
+													<form action="${pageContext.request.contextPath}/BookingServlet" method="post" class="booking-form" id="bookingForm">
+														<input type="hidden" name="action" value="create">
 														<input type="hidden" name="tourId" value="${tour.tourId}">
 														<div class="quantity-selector">
 															<label for="quantity">Số người lớn</label>
@@ -416,6 +423,72 @@
 			document.querySelector('.nav-toggle')?.addEventListener('click', function() {
 				document.querySelector('.nav-menu')?.classList.toggle('active');
 			});
+			
+			// Booking form handling
+			const bookingForm = document.getElementById('bookingForm');
+			if (bookingForm) {
+				bookingForm.addEventListener('submit', function(e) {
+					e.preventDefault();
+					
+					const submitBtn = this.querySelector('.btn-booking');
+					const originalText = submitBtn.innerHTML;
+					submitBtn.disabled = true;
+					submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+					
+					// Lấy giá trị trực tiếp từ các input
+					const tourIdInput = this.querySelector('input[name="tourId"]');
+					const quantityInput = this.querySelector('input[name="quantity"]');
+					const actionInput = this.querySelector('input[name="action"]');
+					
+					const tourId = tourIdInput ? tourIdInput.value : '';
+					const quantity = quantityInput ? quantityInput.value : '1';
+					const action = actionInput ? actionInput.value : 'create';
+					
+					// Tạo URLSearchParams
+					const params = new URLSearchParams();
+					params.append('action', action);
+					params.append('tourId', tourId);
+					params.append('quantity', quantity);
+					
+					fetch(CONTEXT_PATH + '/BookingServlet', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+						},
+						body: params.toString()
+					})
+					.then(response => {
+						if (!response.ok) {
+							throw new Error('Network response was not ok');
+						}
+						return response.text();
+					})
+					.then(text => {
+						try {
+							const data = JSON.parse(text);
+							if (data.status === 'success') {
+								showNotification(data.message || 'Đặt tour thành công!', 'success');
+								setTimeout(() => {
+									window.location.href = CONTEXT_PATH + '/BookingServlet';
+								}, 1500);
+							} else if (data.status === 'error') {
+								showNotification(data.message || 'Có lỗi xảy ra!', 'error');
+								submitBtn.disabled = false;
+								submitBtn.innerHTML = originalText;
+							}
+						} catch (e) {
+							showNotification('Lỗi phản hồi từ server!', 'error');
+							submitBtn.disabled = false;
+							submitBtn.innerHTML = originalText;
+						}
+					})
+					.catch(error => {
+						showNotification('Có lỗi xảy ra: ' + error.message, 'error');
+						submitBtn.disabled = false;
+						submitBtn.innerHTML = originalText;
+					});
+				});
+			}
 			
 			// Favorite button functionality - with proper event handling to prevent page jump
 			const favoriteBtn = document.querySelector('.btn-favorite[data-tour-id]');
