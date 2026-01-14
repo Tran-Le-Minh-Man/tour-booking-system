@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class TourDAO {
     
-    private static final String TABLE_NAME = "Tours";
+    private static final String TABLE_NAME = "tours";
     
     /**
      * Custom exception for database operations
@@ -449,6 +449,33 @@ public class TourDAO {
         }
         
         return destinations;
+    }
+    
+    /**
+     * Get random tours for featured section
+     * @param limit maximum number of tours to return
+     * @return list of random tours
+     */
+    public List<Tour> getRandomTours(int limit) {
+        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE status = 'ACTIVE' ORDER BY RAND() LIMIT ?";
+        List<Tour> tours = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, limit);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    tours.add(mapResultSetToTour(rs));
+                }
+            }
+            
+        } catch (SQLException e) {
+            throw new TourDAOException("getRandomTours", "Error fetching random tours", e);
+        }
+        
+        return tours;
     }
     
     /**

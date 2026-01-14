@@ -274,7 +274,7 @@
 	</section>
 
 	<!-- ========== IMPORT FOOTER ========== -->
-	<jsp:include page="WEB-INF/Common/footer.jsp" />
+	<jsp:include page="/WEB-INF/Common/footer.jsp" />
 
 	<!-- JavaScript -->
 	<script>

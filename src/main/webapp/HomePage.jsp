@@ -3,7 +3,19 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ page import="DAO.TourDAO"%>
+<%@ page import="Model.Tour"%>
+<%@ page import="java.util.List"%>
 <!DOCTYPE html>
+<%
+// Fetch featured tours (3 random tours) if not already in request
+if (request.getAttribute("featuredTours") == null) {
+    TourDAO tourDAO = new TourDAO();
+    List<Tour> featuredTours = tourDAO.getRandomTours(3);
+    request.setAttribute("featuredTours", featuredTours);
+}
+%>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
@@ -56,46 +68,28 @@
 		<div class="container">
 			<h2 class="section-title">Tour Nổi Bật</h2>
 			<div class="tours-grid">
-				<div class="tour-card">
-					<div class="tour-image">
-						<img src="images/kiet/phuquoc.jpg" alt="Phú Quốc">
-					</div>
-					<div class="tour-info">
-						<h3>Phú Quốc 3N2Đ - Thiên Đường Biển</h3>
-						<p class="duration">
-							<i class="fas fa-clock"></i> 3 ngày 2 đêm
-						</p>
-						<p class="price">8.990.000đ</p>
-						<a href="TourDetailServlet?tourId=1" class="btn">Xem chi tiết</a>
-					</div>
-				</div>
-				<div class="tour-card">
-					<div class="tour-image">
-						<img src="images/kiet/nhatrang.jpg" alt="Nha Trang">
-					</div>
-					<div class="tour-info">
-						<h3>Nha Trang - Vinpearl Land</h3>
-						<p class="duration">
-							<i class="far fa-calendar-alt"></i> Khởi hành: 20/11/2025
-						</p>
-						<p class="price">6.500.000đ</p>
-						<a href="TourDetailServlet?tourId=2" class="btn">Xem chi tiết</a>
-					</div>
-				</div>
-				<!-- Tour 3 -->
-				<div class="tour-card">
-					<div class="tour-image">
-						<img src="images/kiet/danang.jpg" alt="Đà Nẵng">
-					</div>
-					<div class="tour-info">
-						<h3>Đà Nẵng - Bà Nà Hills</h3>
-						<p class="duration">
-							<i class="fas fa-users"></i> Còn 5 chỗ
-						</p>
-						<p class="price">5.800.000đ</p>
-						<a href="TourDetailServlet?tourId=3" class="btn">Xem chi tiết</a>
-					</div>
-				</div>
+				<c:choose>
+					<c:when test="${not empty featuredTours}">
+						<c:forEach var="tour" items="${featuredTours}">
+							<div class="tour-card">
+								<div class="tour-image">
+									<img src="${tour.imageUrl}" alt="${tour.name}">
+								</div>
+								<div class="tour-info">
+									<h3>${tour.name}</h3>
+									<p class="duration">
+										<i class="fas fa-clock"></i> ${tour.duration} ngày
+									</p>
+									<p class="price"><fmt:formatNumber value="${tour.price}" type="number" pattern="#,###"/>đ</p>
+									<a href="TourDetailServlet?tourId=${tour.tourId}" class="btn">Xem chi tiết</a>
+								</div>
+							</div>
+						</c:forEach>
+					</c:when>
+					<c:otherwise>
+						<p class="text-center">Hiện không có tour nổi bật nào.</p>
+					</c:otherwise>
+				</c:choose>
 			</div>
 			<div class="center">
 				<a href="TourListServlet" class="btn btn-large">Xem tất cả tour</a>
@@ -113,7 +107,7 @@
 			<div class="promo-grid">
 				<div class="promo-card">
 					<div class="badge">GIẢM 20%</div>
-					<img src="images/kiet/nhatrang-promo.jpg" alt="Nha Trang">
+					<img src="${pageContext.request.contextPath}/Images/KMNhaTrang.png" alt="Nha Trang">
 					<div class="promo-info">
 						<h3>Nha Trang 4N3Đ - Vinpearl + Lặn biển</h3>
 						<p class="old-price">8.500.000đ</p>
@@ -126,7 +120,7 @@
 				</div>
 				<div class="promo-card">
 					<div class="badge">CÒN 3 CHỖ</div>
-					<img src="images/kiet/phuquoc-promo.jpg" alt="Phú Quốc">
+					<img src="${pageContext.request.contextPath}/Images/KMPhuQuoc.jpg" alt="Phú Quốc">
 					<div class="promo-info">
 						<h3>Phú Quốc Bay Thẳng - Resort 5*</h3>
 						<p class="old-price">12.900.000đ</p>
@@ -156,7 +150,7 @@
 					<p class="quote">"Tour Phú Quốc quá tuyệt! Biển đẹp, ăn ngon,
 						hướng dẫn viên vui tính. Sẽ đi tiếp!"</p>
 					<div class="author">
-						<img src="images/kiet/customer1.jpg" alt="Nguyễn Lan">
+						<img src="${pageContext.request.contextPath}/Images/avatar1.jpg" alt="Nguyễn Lan">
 						<div>
 							<strong>Nguyễn Lan</strong><br> <small>Đi tour tháng
 								10/2025</small>
@@ -172,7 +166,7 @@
 					<p class="quote">"Dịch vụ chuyên nghiệp, xe đưa đón đúng giờ.
 						Rất hài lòng!"</p>
 					<div class="author">
-						<img src="images/kiet/customer2.jpg" alt="Trần Minh">
+						<img src="${pageContext.request.contextPath}/Images/avatar2.png" alt="Trần Minh">
 						<div>
 							<strong>Trần Minh</strong><br> <small>Đi tour Nha
 								Trang</small>
@@ -188,7 +182,7 @@
 					<p class="quote">"Ổn, nhưng nên cải thiện thời gian ăn trưa.
 						Còn lại tốt!"</p>
 					<div class="author">
-						<img src="images/kiet/customer3.jpg" alt="Lê Hương">
+						<img src="${pageContext.request.contextPath}/Images/avatar3.png" alt="Lê Hương">
 						<div>
 							<strong>Lê Hương</strong><br> <small>Đi tour Đà Nẵng</small>
 						</div>

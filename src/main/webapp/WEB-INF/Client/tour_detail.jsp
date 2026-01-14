@@ -26,7 +26,7 @@
 </head>
 <body>
 	<!-- ========== IMPORT HEADER ========== -->
-	<jsp:include page="WEB-INF/Common/header.jsp" />
+	<jsp:include page="/WEB-INF/Common/header.jsp" />
 
 	<!-- Breadcrumb -->
 	<section class="breadcrumb-section">
@@ -385,7 +385,7 @@
 	</section>
 
 	<!-- ========== IMPORT FOOTER ========== -->
-	<jsp:include page="WEB-INF/Common/footer.jsp" />
+	<jsp:include page="/WEB-INF/Common/footer.jsp" />
 
 	<!-- JavaScript -->
 	<script>
