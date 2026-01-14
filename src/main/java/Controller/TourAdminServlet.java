@@ -110,10 +110,10 @@ public class TourAdminServlet extends HttpServlet {
 		}
 
 		switch (action) {
-		case "add":
+		case "insert":
 			addTour(request, response);
 			break;
-		case "edit":
+		case "update":
 			updateTour(request, response);
 			break;
 		case "delete":

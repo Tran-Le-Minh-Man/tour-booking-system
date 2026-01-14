@@ -30,8 +30,7 @@
         
         <!-- Tour Form -->
         <div class="form-container">
-            <form action="${pageContext.request.contextPath}/Admin/TourServlet" method="post" 
-                  enctype="multipart/form-data" class="admin-form">
+            <form action="${pageContext.request.contextPath}/Admin/TourServlet" method="post" class="admin-form">
                 
                 <input type="hidden" name="action" value="${empty tour ? 'insert' : 'update'}">
                 <c:if test="${not empty tour}">
@@ -123,13 +122,9 @@
                         <!-- Image URL -->
                         <div class="form-group">
                             <label for="imageUrl">Hình ảnh tour</label>
-                            <div class="file-upload-wrapper">
-                                <input type="file" id="imageUrl" name="imageUrl" accept="image/*" class="file-input">
-                                <label for="imageUrl" class="file-upload-btn">
-                                    <i class="fas fa-cloud-upload-alt"></i> Chọn ảnh
-                                </label>
-                                <span class="file-name" id="fileName">Chưa chọn file</span>
-                            </div>
+                            <input type="text" id="imageUrl" name="imageUrl" 
+                                   value="${tour.imageUrl}" 
+                                   placeholder="Nhập URL hình ảnh (VD: images/tour1.jpg)">
                             <c:if test="${not empty tour.imageUrl}">
                                 <div class="current-image">
                                     <p>Hình ảnh hiện tại:</p>
@@ -176,11 +171,3 @@
 </div>
 
 <jsp:include page="../Common/AdminFooter.jsp" />
-
-<script>
-// Hiển thị tên file khi chọn
-document.getElementById('imageUrl').addEventListener('change', function(e) {
-    var fileName = e.target.files[0] ? e.target.files[0].name : 'Chưa chọn file';
-    document.getElementById('fileName').textContent = fileName;
-});
-</script>
