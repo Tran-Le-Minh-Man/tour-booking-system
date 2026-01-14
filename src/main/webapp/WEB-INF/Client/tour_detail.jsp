@@ -20,9 +20,9 @@
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <!-- Custom CSS -->
-<link href="CSS/HomePage.css" rel="stylesheet">
-<link href="CSS/tour_list.css" rel="stylesheet">
-<link href="CSS/tour_detail.css" rel="stylesheet">
+<link href="${pageContext.request.contextPath}/CSS/HomePage.css" rel="stylesheet">
+<link href="${pageContext.request.contextPath}/CSS/tour_list.css" rel="stylesheet">
+<link href="${pageContext.request.contextPath}/CSS/tour_detail.css" rel="stylesheet">
 </head>
 <body>
 	<!-- ========== IMPORT HEADER ========== -->

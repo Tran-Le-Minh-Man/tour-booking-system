@@ -54,10 +54,10 @@ public class TourDetailServlet extends HttpServlet {
         // Fetch tour details
         Tour tour = tourDAO.findById(tourId);
         
-        // If tour not found or not active, show error
+        // If tour not found or not active, show errorr
         if (tour == null || !"ACTIVE".equalsIgnoreCase(tour.getStatus())) {
             request.setAttribute("errorMessage", "Tour không tồn tại hoặc đã ngừng hoạt động.");
-            request.getRequestDispatcher("tour_detail.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/Client/tour_detail.jsp").forward(request, response);
             return;
         }
         
@@ -86,7 +86,7 @@ public class TourDetailServlet extends HttpServlet {
         request.setAttribute("isFavorite", isFavorite);
         
         // Forward to JSP page
-        request.getRequestDispatcher("tour_detail.jsp").forward(request, response);
+        request.getRequestDispatcher("WEB-INF/Client/tour_detail.jsp").forward(request, response);
     }
 
     @Override

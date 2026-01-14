@@ -86,7 +86,7 @@ public class TourListServlet extends HttpServlet {
         request.setAttribute("departureDate", departureDate);
 
         // Forward to JSP page
-        request.getRequestDispatcher("tour_list.jsp").forward(request, response);
+        request.getRequestDispatcher("WEB-INF/Client/tour_list.jsp").forward(request, response);
     }
 
     @Override
