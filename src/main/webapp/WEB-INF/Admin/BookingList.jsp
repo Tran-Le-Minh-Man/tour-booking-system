@@ -151,10 +151,6 @@
                                         <i class="fas fa-check-double"></i>
                                     </a>
                                 </c:if>
-                                <a href="${pageContext.request.contextPath}/Admin/BookingServlet?action=view&id=${booking.bookingId}" 
-                                   class="btn-action view" title="Xem chi tiết">
-                                    <i class="fas fa-eye"></i>
-                                </a>
                             </td>
                         </tr>
                     </c:forEach>
