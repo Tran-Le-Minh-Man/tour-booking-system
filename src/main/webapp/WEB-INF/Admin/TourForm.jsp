@@ -30,7 +30,8 @@
         
         <!-- Tour Form -->
         <div class="form-container">
-            <form action="${pageContext.request.contextPath}/Admin/TourServlet" method="post" class="admin-form">
+            <form action="${pageContext.request.contextPath}/Admin/TourServlet" method="post" 
+                  enctype="multipart/form-data" class="admin-form">
                 
                 <input type="hidden" name="action" value="${empty tour ? 'insert' : 'update'}">
                 <c:if test="${not empty tour}">
@@ -119,16 +120,19 @@
                     </div>
                     
                     <div class="form-grid">
-                        <!-- Image URL -->
+                        <!-- Image Upload -->
                         <div class="form-group">
-                            <label for="imageUrl">Hình ảnh tour</label>
-                            <input type="text" id="imageUrl" name="imageUrl" 
-                                   value="${tour.imageUrl}" 
-                                   placeholder="Nhập URL hình ảnh (VD: images/tour1.jpg)">
+                            <label for="tourImage">Hình ảnh tour <span class="required">*</span></label>
+                            <input type="file" id="tourImage" name="tourImage" 
+                                   accept="image/png, image/jpeg, image/jpg, image/gif"
+                                   ${empty tour ? 'required' : ''}>
+                            <small style="color: #666; font-size: 12px;">
+                                Cho phép: JPG, JPEG, PNG, GIF. Kích thước tối đa: 5MB
+                            </small>
                             <c:if test="${not empty tour.imageUrl}">
                                 <div class="current-image">
                                     <p>Hình ảnh hiện tại:</p>
-                                    <img src="${tour.imageUrl}" alt="Tour Image">
+                                    <img src="${tour.imageUrl}" alt="Tour Image" style="max-width: 200px; margin-top: 10px;">
                                     <input type="hidden" name="existingImage" value="${tour.imageUrl}">
                                 </div>
                             </c:if>
