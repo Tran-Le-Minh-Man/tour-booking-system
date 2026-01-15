@@ -16,7 +16,11 @@ import java.io.IOException;
 /**
  * Filter to protect user pages (booking, profile, etc.)
  */
-@WebFilter({"/BookingServlet", "/booking/*", "/user/*"})
+@WebFilter({
+    "/BookingServlet", "/booking", "/cart",
+    "/FavoritesServlet", "/favorites",
+    "/ProfileServlet", "/Edit_Profile", "/edit-profile"
+})
 public class AuthFilter implements Filter {
 
     @Override
