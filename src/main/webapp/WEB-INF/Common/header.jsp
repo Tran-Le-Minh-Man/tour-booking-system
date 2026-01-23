@@ -19,29 +19,31 @@
 				<li><a href="${pageContext.request.contextPath}/HomePage.jsp"
 					class="${fn:endsWith(current, '/HomePage.jsp') ? 'active' : ''}">
 						Trang chủ </a></li>
-
+					<c:if test="${sessionScope.user.role == 'USER'}">
 				<li><a
 					href="${pageContext.request.contextPath}/TourListServlet"
 					class="${fn:contains(current, 'TourListServlet') ? 'active' : ''}">
 						Tất cả tour </a></li>
-
+					</c:if>
 				<c:choose>
 
 					<c:when test="${not empty sessionScope.user}">
 
 						<!-- User logged in - Show favorites, cart, and settings dropdown -->
+							<c:if test="${sessionScope.user.role == 'USER'}">
 						<li><a
 							href="${pageContext.request.contextPath}/FavoritesServlet?action=list"
 							class="${fn:contains(current, 'favorites') ? 'active' : ''}">
 								<i class="fas fa-heart"></i> Yêu thích
 						</a></li>
-
+							</c:if>
+							<c:if test="${sessionScope.user.role == 'USER'}">
 						<li><a
 							href="${pageContext.request.contextPath}/BookingServlet"
 							class="${fn:contains(current, 'cart') ? 'active' : ''}"> <i
 								class="fas fa-shopping-cart"></i> Giỏ hàng
 						</a></li>
-
+						</c:if>
 						<!-- Settings Dropdown -->
 						<li class="dropdown"><a href="#" class="dropdown-toggle">
 								<i class="fas fa-user-cog"></i> Cài đặt <i

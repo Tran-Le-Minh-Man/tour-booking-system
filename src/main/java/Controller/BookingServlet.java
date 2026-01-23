@@ -60,9 +60,6 @@ public class BookingServlet extends HttpServlet {
             case "cancel":
                 cancelBooking(request, response, user);
                 break;
-            case "confirm":
-                confirmBooking(request, response, user);
-                break;
             default:
                 showUserBookings(request, response, user);
         }
