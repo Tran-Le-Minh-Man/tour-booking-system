@@ -87,26 +87,26 @@ Sinh viên và người yêu thích trò chơi trí tuệ thường không có b
 
 ### 5.1 In Scope
 
-- Giao diện nhập tên và chọn màu quân trước mỗi ván đấu.
-- Bàn cờ Othello 8×8 với logic game đầy đủ theo luật chuẩn quốc tế.
-- Highlight nước đi hợp lệ cho người chơi trong mỗi lượt.
-- Hiển thị trực quan quân bị lật sau mỗi nước đi.
-- AI đối thủ sử dụng thuật toán tìm kiếm nước đi tự động.
-- Xử lý tự động trường hợp bỏ lượt khi không có nước đi hợp lệ.
-- Màn hình kết quả sau mỗi ván đấu (thắng / thua / hòa).
-- Lưu trữ điểm cao vào file cục bộ, bền vững qua các phiên.
-- Bảng xếp hạng Top 10 điểm cao.
-- Tính năng chơi lại nhanh không cần nhập lại tên.
+1. Giao diện nhập tên và chọn màu quân trước mỗi ván đấu.
+2. Bàn cờ Othello 8×8 với logic game đầy đủ theo luật chuẩn quốc tế.
+3. Highlight nước đi hợp lệ cho người chơi trong mỗi lượt.
+4. Hiển thị trực quan quân bị lật sau mỗi nước đi.
+5. AI đối thủ sử dụng thuật toán tìm kiếm nước đi tự động.
+6. Xử lý tự động trường hợp bỏ lượt khi không có nước đi hợp lệ.
+7. Màn hình kết quả sau mỗi ván đấu (thắng / thua / hòa).
+8. Lưu trữ điểm cao vào file cục bộ, bền vững qua các phiên.
+9. Bảng xếp hạng Top 10 điểm cao.
+10. Tính năng chơi lại nhanh không cần nhập lại tên.
 
 ### 5.2 Out of Scope
 
-- Hệ thống đăng ký / đăng nhập / xác thực tài khoản.
-- Chế độ nhiều người chơi (PvP — Player vs Player).
-- Tích hợp server hoặc cơ sở dữ liệu từ xa.
-- Leaderboard trực tuyến hoặc đồng bộ giữa các thiết bị.
-- Chức năng quản trị (Admin panel).
-- Ứng dụng di động (mobile/tablet).
-- Tính năng chỉnh độ khó AI (reserved for future version).
+1. Hệ thống đăng ký / đăng nhập / xác thực tài khoản.
+2. Chế độ nhiều người chơi (PvP — Player vs Player).
+3. Tích hợp server hoặc cơ sở dữ liệu từ xa.
+4. Leaderboard trực tuyến hoặc đồng bộ giữa các thiết bị.
+5. Chức năng quản trị (Admin panel).
+6. Ứng dụng di động (mobile/tablet).
+7. Tính năng chỉnh độ khó AI (reserved for future version).
 
 ---
 
